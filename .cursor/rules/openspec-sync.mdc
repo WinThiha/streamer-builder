@@ -1,0 +1,22 @@
+---
+description: Always sync OpenSpec delta specs to main specs via the CLI archive flow
+alwaysApply: true
+---
+
+# OpenSpec — always sync delta specs
+
+When completing or archiving an OpenSpec change:
+
+1. **Always sync** delta specs from `openspec/changes/<name>/specs/` into `openspec/specs/` using the official CLI:
+   ```bash
+   openspec archive <change-name> -y
+   ```
+   Do **not** manually copy spec files or skip sync unless the user explicitly asks to archive without specs (`--skip-specs`).
+
+2. If main specs already exist from a partial/manual sync, remove conflicting `openspec/specs/<capability>/spec.md` files (or fix duplicates), then re-run `openspec archive`.
+
+3. After archive, run `openspec validate --specs` and replace any `TBD` Purpose placeholders with real text from the change proposal.
+
+4. Do not use `--skip-specs` for feature changes that introduce or modify capabilities.
+
+Housekeeping order: **sync specs → archive change → validate** — not archive-only without syncing.

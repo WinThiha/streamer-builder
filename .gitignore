@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# pnpm
+.pnpm-store/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# Logs & caches
+*.log
+.vite/
+.turbo/
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor (optional local settings)
+.idea/
