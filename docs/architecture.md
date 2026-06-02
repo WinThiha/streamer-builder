@@ -1,4 +1,4 @@
-# Architecture — Phase 0 stack decisions
+# Architecture — stack decisions
 
 This document records technology choices for the movie streamer monorepo. See [ROADMAP.md](./ROADMAP.md) for product phases.
 
@@ -11,12 +11,13 @@ This document records technology choices for the movie streamer monorepo. See [R
 | Web | Vite + React 19 + React Router | SPA; not Next.js |
 | Server state | TanStack Query | API/cache on client |
 | API | Hono on Node 22 | Lightweight, `@hono/node-server` |
+| Metadata | TMDB v3 (server-side) | `TMDB_API_KEY` never exposed to browser |
 | Database | PostgreSQL 16 | Self-hosted per customer |
 | ORM | Drizzle | TypeScript-first |
 | Validation | Zod in `@movie-streamer/shared` | Shared connector contract |
 | Styling | Tailwind CSS 4 + CSS variables | Tenant themes in Phase 3 |
 | UI components | shadcn/ui direction | Admin/forms in later phases |
-| Player | Shaka Player (Phase 1) | HLS/DASH; not wired in Phase 0 |
+| Player | Shaka Player | HLS demo playback in Phase 1 |
 | Dev runtime | Docker Compose | postgres, api, web |
 | Production proxy | Caddy (Phase 4) | TLS + static + `/api` reverse proxy |
 
@@ -33,6 +34,13 @@ The product is a rich client streaming UI with a separate API and self-hosted st
 - Resolve v1 request/response — `mediaRef` in, `sources[]` out
 
 API and future connectors import the same types.
+
+## Phase 1 catalog and playback
+
+- **TMDB proxy:** API routes under `/v1/catalog/*` fetch TMDB server-side and return normalized DTOs.
+- **Demo playback:** `GET /v1/play/demo` returns one legal HLS `Source`; web uses Shaka Player on `/play`.
+- **MediaRef:** Detail pages construct shared `MediaRef` objects passed to the play page via router state.
+- **No resolve yet:** `POST /api/v1/play/resolve` and connector orchestration are Phase 2.
 
 ## App modes
 

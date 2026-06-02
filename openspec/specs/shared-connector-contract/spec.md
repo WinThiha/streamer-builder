@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Zod schemas and TypeScript types for MediaRef, Source, and resolve v1 request/response shared between API and connectors.
+Shared Zod schemas and TypeScript types for connector contract v1 (`MediaRef`, `Source`, resolve request/response) in `packages/shared`.
 ## Requirements
 ### Requirement: MediaRef schema exported
 
@@ -35,3 +35,4 @@ The `packages/shared` package SHALL export Zod schemas for resolve v1 request (c
 
 - **WHEN** a consumer parses `{ "sources": [] }` as a resolve response
 - **THEN** parsing succeeds with an empty sources array
+

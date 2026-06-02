@@ -1,12 +1,13 @@
 # Movie Streamer
 
-White-label, self-hosted streaming UI platform. Phase 0 provides the monorepo foundation: shared connector types, API shell, web shell, and Docker dev stack.
+White-label, self-hosted streaming UI platform. Phase 1 adds TMDB browse/search/detail and demo HLS playback via Shaka Player.
 
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 22+
 - [pnpm](https://pnpm.io/) 9+
 - [Docker](https://www.docker.com/) (optional, for Compose dev stack)
+- [TMDB API key](https://www.themoviedb.org/settings/api) (required for Phase 1 catalog)
 
 ## Repository layout
 
@@ -39,6 +40,8 @@ docker/
    pnpm prepare:shared
    ```
 
+4. Set `TMDB_API_KEY` in `.env` (get a key from [TMDB](https://www.themoviedb.org/settings/api)).
+
 ## Local development (no Docker)
 
 Terminal 1 — API (requires PostgreSQL; use Compose postgres only if desired):
@@ -49,6 +52,7 @@ docker compose -f docker-compose.dev.yml up postgres -d
 
 export DATABASE_URL=postgresql://movie:movie@localhost:5432/movie_streamer
 export APP_MODE=production
+export TMDB_API_KEY=your_key_here
 pnpm dev:api
 ```
 
@@ -65,12 +69,21 @@ pnpm dev:web
 ## Docker development
 
 ```bash
-docker compose -f docker-compose.dev.yml up
+docker compose -f docker-compose.dev.yml up --build
 ```
 
 - Web: http://localhost:5173
 - API: http://localhost:3001
 - PostgreSQL: localhost:5432
+
+**Windows/macOS:** Compose uses named volumes for `node_modules` so Linux containers do not use your host’s `node_modules` (pnpm symlinks break across OS boundaries). The first `up` may take a few minutes while `api` runs `pnpm install`. If you changed dependencies, recreate volumes:
+
+```bash
+docker compose -f docker-compose.dev.yml down -v
+docker compose -f docker-compose.dev.yml up
+```
+
+**Hot reload in Docker:** File watching and Vite HMR are configured for Docker (polling + `localhost` HMR host). After changing `vite.config.ts`, recreate the web container: `docker compose -f docker-compose.dev.yml up -d --force-recreate web`. For the fastest edit-refresh loop on Windows, run `pnpm dev:web` on the host and keep only postgres/api in Docker.
 
 ## Scripts
 
@@ -85,10 +98,23 @@ docker compose -f docker-compose.dev.yml up
 | `pnpm dev:web` | Vite dev server |
 | `pnpm build` | Build all packages |
 
+## Phase 1 — Browse and play
+
+With `TMDB_API_KEY` set:
+
+1. Open http://localhost:5173 — browse trending, popular movies, and TV rows.
+2. Use **Search** to find titles.
+3. Open a movie or TV detail page and click **Play**.
+4. The play page loads a legal demo HLS stream (same for all titles in Phase 1).
+
+API catalog routes (via web proxy): `/api/v1/catalog/home`, `/api/v1/catalog/search?q=`, `/api/v1/catalog/movie/:id`, `/api/v1/catalog/tv/:id`, `/api/v1/play/demo`.
+
 ## Phase 0 scope
 
 Included: monorepo, shared Zod contracts, health API, web shell, Compose dev stack.
 
-Not included: TMDB, playback, connectors, theming, Deploy Pack, Shaka Player.
+Phase 1 adds: TMDB catalog API, browse/search/detail UI, Shaka demo playback.
+
+Not included: connector resolve, source picker, theming, Deploy Pack.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full roadmap.

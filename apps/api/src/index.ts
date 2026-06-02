@@ -3,6 +3,8 @@ import { Hono } from 'hono';
 import { resolveResponseSchema } from '@movie-streamer/shared';
 import { checkDatabase, closeDatabase } from './db.js';
 import { env } from './env.js';
+import { catalogRoutes } from './routes/catalog.js';
+import { playRoutes } from './routes/play.js';
 
 const app = new Hono();
 
@@ -24,6 +26,9 @@ app.get('/api/v1/contracts/resolve-sample', (c) => {
   const sample = resolveResponseSchema.parse({ sources: [] });
   return c.json(sample);
 });
+
+app.route('/v1/catalog', catalogRoutes);
+app.route('/v1/play', playRoutes);
 
 const port = env.PORT;
 

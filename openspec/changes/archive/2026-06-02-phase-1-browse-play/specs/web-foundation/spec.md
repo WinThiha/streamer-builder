@@ -1,9 +1,5 @@
-# web-foundation Specification
+## MODIFIED Requirements
 
-## Purpose
-
-Vite + React subscriber shell with routing, Tailwind theming scaffold, and API integration for local development.
-## Requirements
 ### Requirement: Web dev server runs
 
 The web application SHALL start via Vite dev server on port 5173 (or configured port) and render a shell layout with catalog browse content on the home page.
@@ -12,15 +8,6 @@ The web application SHALL start via Vite dev server on port 5173 (or configured 
 
 - **WHEN** a user opens the web app root URL in a browser during development
 - **THEN** a shell layout with catalog browse rows or loading state is visible
-
-### Requirement: API URL configuration
-
-The web application SHALL read the API base URL from environment (e.g. `VITE_API_URL`) and SHALL use it for API requests (health check or placeholder fetch acceptable in Phase 0).
-
-#### Scenario: Env-driven API base
-
-- **WHEN** `VITE_API_URL` is set to `http://localhost:3001`
-- **THEN** client-side API calls target that base URL
 
 ### Requirement: Client routing shell
 
@@ -35,4 +22,3 @@ The web application SHALL use React Router with routes for home (`/`), search (`
 
 - **WHEN** a user navigates to `/play` from a detail page Play action
 - **THEN** the play page renders without full page reload
-

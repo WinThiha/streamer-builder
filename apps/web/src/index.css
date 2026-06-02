@@ -16,3 +16,27 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
 }
+
+.media-row-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-y: hidden;
+  overscroll-behavior-y: none;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.media-row-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.media-card {
+  scroll-snap-align: start;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.media-card img {
+  -webkit-user-drag: none;
+  user-select: none;
+}

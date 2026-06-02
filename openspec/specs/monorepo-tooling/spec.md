@@ -30,3 +30,4 @@ The repository SHALL provide root scripts for ESLint and Prettier applicable to 
 
 - **WHEN** a developer runs the root `lint` script after Phase 0 implementation
 - **THEN** lint completes with no errors on scaffolded code
+

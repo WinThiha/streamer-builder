@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Docker Compose dev stack with PostgreSQL, API, and web services plus documented environment template.
+Docker Compose development stack (PostgreSQL, API, web) and documented environment template for local and cross-platform dev.
 ## Requirements
 ### Requirement: Docker Compose dev stack
 
@@ -39,3 +39,4 @@ The repository SHALL include a `docker/production/` directory with a README desc
 
 - **WHEN** a developer reads `docker/production/README.md`
 - **THEN** they understand production topology is deferred to Phase 4
+

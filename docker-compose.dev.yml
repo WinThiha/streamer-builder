@@ -1,3 +1,18 @@
+# Dev stack. On Windows/macOS, named volumes hide host node_modules so pnpm
+# installs Linux-native deps inside the container (bind-mounting host node_modules breaks symlinks).
+
+x-node-dev-volumes: &node-dev-volumes
+  - .:/app
+  - root_node_modules:/app/node_modules
+  - shared_node_modules:/app/packages/shared/node_modules
+  - api_node_modules:/app/apps/api/node_modules
+  - web_node_modules:/app/apps/web/node_modules
+  - pnpm_store:/pnpm-store
+
+x-node-dev-env: &node-dev-env
+  CI: "true"
+  PNPM_STORE_DIR: /pnpm-store
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -20,37 +35,57 @@ services:
     working_dir: /app
     command: >
       sh -c "corepack enable &&
-      pnpm install &&
+      pnpm install --frozen-lockfile &&
       pnpm --filter @movie-streamer/shared build &&
       pnpm --filter @movie-streamer/api dev"
     ports:
       - "3001:3001"
     environment:
+      <<: *node-dev-env
       DATABASE_URL: postgresql://movie:movie@postgres:5432/movie_streamer
       APP_MODE: production
       PORT: 3001
       NODE_ENV: development
-    volumes:
-      - .:/app
+      TMDB_API_KEY: ${TMDB_API_KEY:?Set TMDB_API_KEY in .env}
+    volumes: *node-dev-volumes
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "fetch(''http://127.0.0.1:3001/health'').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 180s
 
   web:
     image: node:22-alpine
     working_dir: /app
+    # Dependencies installed by api into shared volumes; web only starts Vite.
     command: >
       sh -c "corepack enable &&
-      pnpm install &&
       pnpm --filter @movie-streamer/web dev --host 0.0.0.0"
     ports:
       - "5173:5173"
     environment:
+      <<: *node-dev-env
       VITE_PROXY_API_TARGET: http://api:3001
-    volumes:
-      - .:/app
+      VITE_DOCKER: "true"
+      VITE_HMR_HOST: localhost
+      CHOKIDAR_USEPOLLING: "true"
+    volumes: *node-dev-volumes
     depends_on:
-      - api
+      api:
+        condition: service_healthy
 
 volumes:
   postgres_data:
+  root_node_modules:
+  shared_node_modules:
+  api_node_modules:
+  web_node_modules:
+  pnpm_store:
