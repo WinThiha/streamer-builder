@@ -1,7 +1,8 @@
 import type {
-  DemoSource,
   HomeCatalogResponse,
   MovieDetail,
+  PlayLocationState,
+  ResolveResponse,
   SearchCatalogResponse,
   SeasonDetailResponse,
   TvDetail,
@@ -23,8 +24,8 @@ export type HealthResponse = {
   database: string;
 };
 
-async function fetchJson<T>(path: string): Promise<T> {
-  const res = await fetch(apiUrl(path));
+async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(apiUrl(path), init);
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as { error?: string } | null;
     throw new Error(body?.error ?? `Request failed: ${res.status}`);
@@ -95,8 +96,14 @@ export async function fetchTvSeason(tvId: string, season: number): Promise<Seaso
   return fetchJson<SeasonDetailResponse>(`/v1/catalog/tv/${tvId}/season/${season}`);
 }
 
-export async function fetchDemoSource(): Promise<DemoSource> {
-  return fetchJson<DemoSource>('/v1/play/demo');
+export async function fetchPlayResolve(
+  mediaRef: PlayLocationState['mediaRef'],
+): Promise<ResolveResponse> {
+  return fetchJson<ResolveResponse>('/v1/play/resolve', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mediaRef }),
+  });
 }
 
 export type { PlayLocationState } from './types';

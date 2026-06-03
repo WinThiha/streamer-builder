@@ -1,17 +1,4 @@
-# demo-playback Specification
-
-## Purpose
-
-Shaka Player integration on a play page with one legal demo HLS source, driven by `MediaRef` context from the selected title.
-## Requirements
-### Requirement: Demo stream endpoint
-
-The API application SHALL expose `GET /api/v1/play/demo` returning a single playback source object compatible with the shared `Source` schema with `kind: "hls"` and a legal demo stream URL.
-
-#### Scenario: Demo source returned
-
-- **WHEN** a client requests `GET /api/v1/play/demo`
-- **THEN** the response status is 200 and the body contains one HLS source with a valid URL
+## MODIFIED Requirements
 
 ### Requirement: Play page with Shaka Player
 
@@ -31,23 +18,7 @@ The web application SHALL display contextual metadata on the play page derived f
 - **WHEN** a user plays a movie with id `550`
 - **THEN** the play page indicates the selected title context while playing the chosen source
 
-### Requirement: Playback error handling
-
-The web application SHALL display a user-visible error if Shaka Player fails to load or play the demo stream.
-
-#### Scenario: Stream load failure
-
-- **WHEN** the demo HLS stream fails to load
-- **THEN** an error message is displayed on the play page
-
-### Requirement: Player cleanup on unmount
-
-The web application SHALL destroy or unload the Shaka Player instance when the play page unmounts to avoid resource leaks during navigation.
-
-#### Scenario: Navigate away from play
-
-- **WHEN** a user navigates away from `/play`
-- **THEN** the Shaka Player instance is cleaned up without console errors from stale instances
+## ADDED Requirements
 
 ### Requirement: Demo stream endpoint retained
 
@@ -57,4 +28,3 @@ The API application SHALL expose `GET /api/v1/play/demo` returning a single play
 
 - **WHEN** a client requests `GET /api/v1/play/demo`
 - **THEN** the response status is 200 and the body contains one HLS source with a valid URL
-

@@ -31,16 +31,23 @@ The product is a rich client streaming UI with a separate API and self-hosted st
 
 - `MediaRef` — provider, type, id, optional season/episode
 - `Source` — playback option from a connector
-- Resolve v1 request/response — `mediaRef` in, `sources[]` out
+- Resolve v1 request/response — `mediaRef` in, optional `metadata`, `sources[]` out
+- Connector configs — `demo`, `manual` (static sources), `http` (customer resolver URL)
 
-API and future connectors import the same types.
+API and connectors import the same types. See [connector-contract-v1.md](./connector-contract-v1.md).
 
 ## Phase 1 catalog and playback
 
 - **TMDB proxy:** API routes under `/v1/catalog/*` fetch TMDB server-side and return normalized DTOs.
-- **Demo playback:** `GET /v1/play/demo` returns one legal HLS `Source`; web uses Shaka Player on `/play`.
 - **MediaRef:** Detail pages construct shared `MediaRef` objects passed to the play page via router state.
-- **No resolve yet:** `POST /api/v1/play/resolve` and connector orchestration are Phase 2.
+
+## Phase 2 resolve and connectors
+
+- **Persistence:** `connectors` table in PostgreSQL (Drizzle); migrations on API startup and via `db:migrate`.
+- **Resolve:** `POST /v1/play/resolve` runs enabled connectors in parallel, validates sources, merges with dedupe by URL, caches in memory (~15m).
+- **Admin:** `/v1/admin/connectors` CRUD + Test (unauthenticated in local dev).
+- **Web:** Play page resolves and shows source picker; Shaka plays `hls` / `progressive`; `embed` deferred in UI.
+- **Legacy:** `GET /v1/play/demo` retained for simple demo access.
 
 ## App modes
 

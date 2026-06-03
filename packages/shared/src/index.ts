@@ -17,3 +17,15 @@ export {
   type ResolveRequest,
   type ResolveResponse,
 } from './schemas/resolve.js';
+export {
+  connectorKindSchema,
+  connectorConfigSchema,
+  demoConnectorConfigSchema,
+  manualConnectorConfigSchema,
+  httpConnectorConfigSchema,
+  type ConnectorKind,
+  type ConnectorConfig,
+  type DemoConnectorConfig,
+  type ManualConnectorConfig,
+  type HttpConnectorConfig,
+} from './schemas/connector.js';

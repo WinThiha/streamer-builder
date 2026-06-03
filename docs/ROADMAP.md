@@ -274,7 +274,7 @@ Implement only when needed:
 ## Related docs
 
 - `docs/architecture.md` — stack ADR (Phase 0, complete)
-- `docs/connector-contract-v1.md` — normative connector API (Phase 2)
+- `docs/connector-contract-v1.md` — normative connector API (Phase 2, implemented)
 - `openspec/specs/` — capability specs synced from Phase 0
 - `openspec/changes/archive/` — completed change proposals
 

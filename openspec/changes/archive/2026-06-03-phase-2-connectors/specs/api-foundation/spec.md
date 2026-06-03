@@ -1,31 +1,4 @@
-# api-foundation Specification
-
-## Purpose
-
-Hono API shell with health check, environment validation, and PostgreSQL connectivity via Drizzle.
-## Requirements
-### Requirement: Health endpoint
-
-The API application SHALL expose `GET /health` that returns HTTP 200 with a JSON body indicating the service is up.
-
-#### Scenario: Health check succeeds
-
-- **WHEN** a client requests `GET /health` on the running API
-- **THEN** the response status is 200 and the body indicates healthy status
-
-### Requirement: Environment validation at startup
-
-The API application SHALL validate required environment variables at startup using a schema (e.g. Zod) and SHALL fail fast with a clear error if validation fails. Required variables SHALL include `DATABASE_URL`, `APP_MODE`, and `TMDB_API_KEY`.
-
-#### Scenario: Missing DATABASE_URL fails startup
-
-- **WHEN** the API starts without `DATABASE_URL` set
-- **THEN** the process exits with a descriptive validation error
-
-#### Scenario: Missing TMDB_API_KEY fails startup
-
-- **WHEN** the API starts without `TMDB_API_KEY` set
-- **THEN** the process exits with a descriptive validation error
+## MODIFIED Requirements
 
 ### Requirement: Database connection placeholder
 
@@ -59,4 +32,3 @@ The API application SHALL mount versioned route groups under `/api/v1/catalog/*`
 
 - **WHEN** the API is running with valid configuration
 - **THEN** `GET /api/v1/admin/connectors` responds with the connector list
-

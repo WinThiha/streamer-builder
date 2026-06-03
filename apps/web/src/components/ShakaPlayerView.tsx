@@ -53,6 +53,11 @@ export function ShakaPlayerView({ src }: ShakaPlayerViewProps) {
       try {
         setError(null);
         await player.load(src);
+        if (!cancelled) {
+          void video.play().catch(() => {
+            /* autoplay may be blocked; user can press play */
+          });
+        }
       } catch (err) {
         if (cancelled || isIgnorableShakaError(err)) {
           return;
@@ -63,7 +68,7 @@ export function ShakaPlayerView({ src }: ShakaPlayerViewProps) {
 
     return () => {
       cancelled = true;
-      void player.destroy();
+      void player.destroy().catch(() => undefined);
     };
   }, [src]);
 

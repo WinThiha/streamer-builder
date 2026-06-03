@@ -1,6 +1,6 @@
 # Movie Streamer
 
-White-label, self-hosted streaming UI platform. Phase 1 adds TMDB browse/search/detail and demo HLS playback via Shaka Player.
+White-label, self-hosted streaming UI platform. Phase 1 adds TMDB browse/search/detail; Phase 2 adds multi-source resolve, connector admin API, and a source picker.
 
 ## Prerequisites
 
@@ -16,10 +16,11 @@ apps/
   api/          Hono API (health, env, Drizzle + PostgreSQL)
   web/          Vite + React subscriber shell
 packages/
-  shared/       Zod schemas: MediaRef, Source, resolve v1
+  shared/       Zod schemas: MediaRef, Source, resolve v1, connector configs
 docs/
   ROADMAP.md    Product phases
   architecture.md  Stack ADR
+  connector-contract-v1.md  Normative resolve API
 docker/
   production/   Phase 4 placeholder
 ```
@@ -97,6 +98,8 @@ docker compose -f docker-compose.dev.yml up
 | `pnpm dev:api` | API dev server |
 | `pnpm dev:web` | Vite dev server |
 | `pnpm build` | Build all packages |
+| `pnpm --filter @movie-streamer/api db:migrate` | Apply connector table migration |
+| `pnpm --filter @movie-streamer/api db:seed` | Seed demo + sample manual connectors |
 
 ## Phase 1 — Browse and play
 
@@ -105,9 +108,71 @@ With `TMDB_API_KEY` set:
 1. Open http://localhost:5173 — browse trending, popular movies, and TV rows.
 2. Use **Search** to find titles.
 3. Open a movie or TV detail page and click **Play**.
-4. The play page loads a legal demo HLS stream (same for all titles in Phase 1).
 
-API catalog routes (via web proxy): `/api/v1/catalog/home`, `/api/v1/catalog/search?q=`, `/api/v1/catalog/movie/:id`, `/api/v1/catalog/tv/:id`, `/api/v1/play/demo`.
+## Phase 2 — Connectors and source picker
+
+On API startup (or after `db:migrate` + `db:seed`), default **demo** and **manual** connectors are seeded. Play resolves sources from all enabled connectors.
+
+1. Browse to a title and click **Play**.
+2. The play page calls `POST /api/v1/play/resolve` and shows a **source picker** when multiple streams are returned.
+3. Switch sources to change the Shaka Player stream.
+
+API routes (via web proxy):
+
+- `POST /api/v1/play/resolve` — resolve `mediaRef` to `sources[]`
+- `GET /api/v1/play/demo` — single demo source (legacy/dev)
+- `GET /api/v1/admin/connectors` — list connectors
+- `POST /api/v1/admin/connectors` — create connector
+- `PATCH /api/v1/admin/connectors/:id` — update connector
+- `DELETE /api/v1/admin/connectors/:id` — delete connector
+- `POST /api/v1/admin/connectors/:id/test` — test connector with a `mediaRef`
+
+See [docs/connector-contract-v1.md](docs/connector-contract-v1.md) for request/response shapes.
+
+### Admin API examples (curl)
+
+List connectors:
+
+```bash
+curl -s http://localhost:3001/v1/admin/connectors
+```
+
+Create a manual connector with a static HLS URL:
+
+```bash
+curl -s -X POST http://localhost:3001/v1/admin/connectors \
+  -H "Content-Type: application/json" \
+  -d '{
+    "label": "My Test Server",
+    "kind": "manual",
+    "priority": 30,
+    "config": {
+      "kind": "manual",
+      "sources": [{
+        "id": "test-1",
+        "label": "Test HLS",
+        "kind": "hls",
+        "url": "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"
+      }]
+    }
+  }'
+```
+
+Test a connector:
+
+```bash
+curl -s -X POST http://localhost:3001/v1/admin/connectors/demo-default/test \
+  -H "Content-Type: application/json" \
+  -d '{"mediaRef":{"provider":"tmdb","type":"movie","id":"550"}}'
+```
+
+Resolve playback:
+
+```bash
+curl -s -X POST http://localhost:3001/v1/play/resolve \
+  -H "Content-Type: application/json" \
+  -d '{"mediaRef":{"provider":"tmdb","type":"movie","id":"550"}}'
+```
 
 ## Phase 0 scope
 
@@ -115,6 +180,8 @@ Included: monorepo, shared Zod contracts, health API, web shell, Compose dev sta
 
 Phase 1 adds: TMDB catalog API, browse/search/detail UI, Shaka demo playback.
 
-Not included: connector resolve, source picker, theming, Deploy Pack.
+Phase 2 adds: connector persistence, resolve orchestration, admin connector API, source picker.
+
+Not included: theming, Deploy Pack, vendor `/prototype` routes.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full roadmap.

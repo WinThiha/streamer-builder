@@ -4,6 +4,7 @@ import { sourceSchema } from './source.js';
 
 export const resolveRequestSchema = z.object({
   mediaRef: mediaRefSchema,
+  metadata: z.record(z.unknown()).optional(),
 });
 
 export const resolveResponseSchema = z.object({

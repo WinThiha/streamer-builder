@@ -74,13 +74,21 @@ export type SeasonDetailResponse = {
   episodes: EpisodeItem[];
 };
 
-export type DemoSource = {
+export type PlaybackSource = {
   id: string;
   connectorId: string;
   label: string;
   kind: 'hls' | 'progressive' | 'embed';
   url: string;
+  expiresAt?: string;
 };
+
+export type ResolveResponse = {
+  sources: PlaybackSource[];
+};
+
+/** @deprecated Use PlaybackSource */
+export type DemoSource = PlaybackSource;
 
 export type PlayLocationState = {
   mediaRef: {

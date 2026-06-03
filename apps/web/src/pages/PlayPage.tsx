@@ -1,18 +1,44 @@
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { BackButton } from '../components/BackButton';
 import { ShakaPlayerView } from '../components/ShakaPlayerView';
+import { SourcePicker } from '../components/SourcePicker';
 import { CatalogError, CatalogLoading } from '../components/CatalogStatus';
-import { fetchDemoSource, type PlayLocationState } from '../lib/api';
+import { fetchPlayResolve, type PlayLocationState } from '../lib/api';
+import type { PlaybackSource } from '../lib/types';
 
 export function PlayPage() {
   const location = useLocation();
   const state = location.state as PlayLocationState | null;
+  const [selectedSource, setSelectedSource] = useState<PlaybackSource | null>(null);
 
-  const { data: source, isLoading, isError, error } = useQuery({
-    queryKey: ['play', 'demo'],
-    queryFn: fetchDemoSource,
+  const {
+    data: resolveData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['play', 'resolve', state?.mediaRef],
+    queryFn: () => fetchPlayResolve(state!.mediaRef),
+    enabled: Boolean(state?.mediaRef),
   });
+
+  const sources = resolveData?.sources ?? [];
+
+  useEffect(() => {
+    const list = resolveData?.sources ?? [];
+    if (list.length === 0) {
+      setSelectedSource(null);
+      return;
+    }
+    setSelectedSource((current) => {
+      if (current && list.some((s) => s.id === current.id)) {
+        return current;
+      }
+      return list[0] ?? null;
+    });
+  }, [resolveData]);
 
   if (!state?.mediaRef) {
     return <Navigate to="/" replace />;
@@ -25,20 +51,48 @@ export function PlayPage() {
       ? `Movie · TMDB ${mediaRef.id}`
       : `TV · TMDB ${mediaRef.id} · S${mediaRef.season} E${mediaRef.episode}`;
 
+  const isEmbedSelected = selectedSource?.kind === 'embed';
+  const canPlayShaka =
+    selectedSource && (selectedSource.kind === 'hls' || selectedSource.kind === 'progressive');
+
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
       <BackButton to={detailPath} ariaLabel="Back to details" className="mb-6" />
 
-      <div>
-        <h1 className="text-2xl font-bold">{title ?? 'Now Playing'}</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">{contextLabel}</p>
-        <p className="mt-1 text-xs text-[var(--color-muted)]">Demo stream — same for all titles in Phase 1</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold">{title ?? 'Now Playing'}</h1>
+          <p className="mt-1 text-sm text-[var(--color-muted)]">{contextLabel}</p>
+        </div>
+        {!isLoading && !isError && sources.length > 1 && (
+          <SourcePicker
+            sources={sources}
+            selectedId={selectedSource?.id ?? null}
+            onSelect={setSelectedSource}
+            className="w-full shrink-0 sm:w-auto sm:min-w-[240px]"
+          />
+        )}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4">
         {isLoading && <CatalogLoading />}
         {isError && <CatalogError message={(error as Error).message} />}
-        {source && <ShakaPlayerView src={source.url} />}
+        {!isLoading && !isError && sources.length === 0 && (
+          <CatalogError message="No streams available for this title." />
+        )}
+        {!isLoading && !isError && sources.length > 0 && (
+          <>
+            {isEmbedSelected && (
+              <div className="mb-4 rounded-lg border border-neutral-700 bg-neutral-900/50 px-4 py-3 text-sm text-[var(--color-muted)]">
+                Embed playback is not supported in this version. Choose an HLS or progressive
+                source.
+              </div>
+            )}
+            {canPlayShaka && (
+              <ShakaPlayerView key={selectedSource.id} src={selectedSource.url} />
+            )}
+          </>
+        )}
       </div>
     </div>
   );
