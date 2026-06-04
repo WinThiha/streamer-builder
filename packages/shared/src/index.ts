@@ -29,3 +29,22 @@ export {
   type ManualConnectorConfig,
   type HttpConnectorConfig,
 } from './schemas/connector.js';
+export {
+  siteConfigSchema,
+  siteConfigPatchSchema,
+  siteThemeSchema,
+  logoSchema,
+  templateIdSchema,
+  homepageBlockSchema,
+  homepageCategoryKeySchema,
+  HOMEPAGE_CATEGORY_LABELS,
+  HOMEPAGE_CATEGORY_KEYS,
+  defaultSiteConfig,
+  type SiteConfig,
+  type SiteConfigPatch,
+  type SiteTheme,
+  type LogoConfig,
+  type TemplateId,
+  type HomepageBlock,
+  type HomepageCategoryKey,
+} from './schemas/site-config.js';

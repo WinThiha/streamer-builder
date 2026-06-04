@@ -15,8 +15,8 @@ This document records technology choices for the movie streamer monorepo. See [R
 | Database | PostgreSQL 16 | Self-hosted per customer |
 | ORM | Drizzle | TypeScript-first |
 | Validation | Zod in `@movie-streamer/shared` | Shared connector contract |
-| Styling | Tailwind CSS 4 + CSS variables | Tenant themes in Phase 3 |
-| UI components | shadcn/ui direction | Admin/forms in later phases |
+| Styling | Tailwind CSS 4 + CSS variables | Runtime tenant theme via CSS variables (Phase 3) |
+| UI components | Native admin forms | `/admin` branding and homepage (Phase 3) |
 | Player | Shaka Player | HLS demo playback in Phase 1 |
 | Dev runtime | Docker Compose | postgres, api, web |
 | Production proxy | Caddy (Phase 4) | TLS + static + `/api` reverse proxy |
@@ -40,6 +40,17 @@ API and connectors import the same types. See [connector-contract-v1.md](./conne
 
 - **TMDB proxy:** API routes under `/v1/catalog/*` fetch TMDB server-side and return normalized DTOs.
 - **MediaRef:** Detail pages construct shared `MediaRef` objects passed to the play page via router state.
+
+## Phase 3 white-label and admin shell
+
+- **Site config:** `SiteConfig` in `@movie-streamer/shared`; singleton `site_config` table with `draft` and `published` JSON documents.
+- **Public API:** `GET /v1/site/config` (published only); `GET /v1/site/assets/logo` for uploaded logos.
+- **Admin API:** `GET/PATCH /v1/admin/site/config`, `POST .../publish`, `POST .../logo` (multipart), `GET .../preview-home` (draft homepage rows).
+- **Uploads:** `UPLOAD_DIR` (default `./data/uploads`); logos stored on server disk, not external object storage.
+- **Catalog home:** Built from published homepage blocks mapped to curated TMDB category keys (`trending_day`, `popular_movies`, `popular_tv`, `top_rated_movies`).
+- **Web:** `/admin` shell (branding, homepage, preview); subscriber shell reads published config; theme applied at runtime; layouts `hero-rows` and `grid-first`.
+- **TMDB:** Each customer deployment uses its own `TMDB_API_KEY`. Operators must comply with [TMDB API terms](https://www.themoviedb.org/api-terms-of-use) (attribution, commercial license if applicable). This product does not embed a vendor TMDB key in customer packs.
+- **Draft/publish:** Admin edits update draft only; subscriber UI and public catalog use published config until publish.
 
 ## Phase 2 resolve and connectors
 

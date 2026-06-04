@@ -104,6 +104,10 @@ export class TmdbClient {
     return this.fetch<TmdbPagedResponse<TmdbMediaItem>>('/tv/popular');
   }
 
+  getTopRatedMovies() {
+    return this.fetch<TmdbPagedResponse<TmdbMediaItem>>('/movie/top_rated');
+  }
+
   searchMulti(query: string) {
     return this.fetch<TmdbPagedResponse<TmdbMediaItem>>('/search/multi', { query });
   }

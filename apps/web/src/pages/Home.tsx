@@ -1,10 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchCatalogHome } from '../lib/api';
 import { CatalogError, CatalogLoading } from '../components/CatalogStatus';
-import { HeroBanner } from '../components/HeroBanner';
-import { MediaRow } from '../components/MediaRow';
+import { useSiteConfig } from '../providers/SiteConfigProvider';
+import { HomeHeroRowsLayout } from './home/HomeHeroRowsLayout';
+import { HomeGridFirstLayout } from './home/HomeGridFirstLayout';
 
 export function Home() {
+  const { config } = useSiteConfig();
+  const templateId = config?.templateId ?? 'hero-rows';
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['catalog', 'home'],
     queryFn: fetchCatalogHome,
@@ -18,15 +22,12 @@ export function Home() {
           <CatalogError message={(error as Error).message} />
         </div>
       )}
-      {data?.featured && <HeroBanner featured={data.featured} />}
-
-      {data && (
-        <div className="relative mx-auto max-w-6xl px-6 pb-10 pt-6">
-          {data.rows.map((row) => (
-            <MediaRow key={row.name} row={row} />
-          ))}
-        </div>
-      )}
+      {data &&
+        (templateId === 'grid-first' ? (
+          <HomeGridFirstLayout data={data} />
+        ) : (
+          <HomeHeroRowsLayout data={data} />
+        ))}
     </div>
   );
 }

@@ -5,9 +5,13 @@ import { checkDatabase, closeDatabase } from './db.js';
 import { env } from './env.js';
 import { runMigrations } from './db/migrate.js';
 import { seedConnectors } from './connectors/seed.js';
+import { seedSiteConfig } from './site-config/seed.js';
+import { ensureUploadDirOnBoot } from './site-config/assets.js';
 import { catalogRoutes } from './routes/catalog.js';
 import { playRoutes } from './routes/play.js';
 import { adminConnectorRoutes } from './routes/admin/connectors.js';
+import { siteRoutes } from './routes/site.js';
+import { adminSiteRoutes } from './routes/admin/site-config.js';
 
 const app = new Hono();
 
@@ -32,12 +36,16 @@ app.get('/api/v1/contracts/resolve-sample', (c) => {
 
 app.route('/v1/catalog', catalogRoutes);
 app.route('/v1/play', playRoutes);
+app.route('/v1/site', siteRoutes);
 app.route('/v1/admin/connectors', adminConnectorRoutes);
+app.route('/v1/admin/site', adminSiteRoutes);
 
 const port = env.PORT;
 
 async function bootstrap() {
+  ensureUploadDirOnBoot();
   await runMigrations();
+  await seedSiteConfig();
   await seedConnectors();
   console.log(`API listening on http://localhost:${port} (APP_MODE=${env.APP_MODE})`);
   serve({ fetch: app.fetch, port });

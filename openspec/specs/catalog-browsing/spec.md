@@ -6,12 +6,12 @@ Web home page with TMDB browse rows, media cards, featured hero, and navigation 
 ## Requirements
 ### Requirement: Home page displays catalog rows
 
-The web application SHALL display TMDB browse rows on the home page (`/`), fetched from the catalog home API endpoint, with each item showing at least a poster image and title.
+The web application SHALL display TMDB browse rows on the home page (`/`), fetched from the catalog home API endpoint (which reflects **published** homepage blocks), with each item showing at least a poster image and title, using the published layout preset.
 
 #### Scenario: Home rows visible
 
 - **WHEN** a user opens `/` with the API and TMDB configured
-- **THEN** at least one horizontal row of media items is visible with posters and titles
+- **THEN** at least one horizontal row or grid section of media items is visible with posters and titles
 
 ### Requirement: Catalog items link to detail pages
 
@@ -49,4 +49,13 @@ The web application shell SHALL include navigation to a search page (`/search`).
 
 - **WHEN** a user activates search navigation in the shell
 - **THEN** the browser navigates to `/search`
+
+### Requirement: Home layout from published template
+
+The web application home page (`/`) SHALL render using the layout preset indicated by published `templateId` (`hero-rows` or `grid-first`).
+
+#### Scenario: Template switch after publish
+
+- **WHEN** an admin publishes a change from `hero-rows` to `grid-first`
+- **THEN** the home page at `/` renders the grid-first layout without redeploying the web bundle
 

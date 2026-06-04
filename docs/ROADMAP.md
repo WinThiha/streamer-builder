@@ -154,6 +154,16 @@ TMDB UI, connectors, wizard, theming, Deploy Pack generation.
 
 **Done when:** Change theme/template in admin → subscriber site updates.
 
+**Implemented (June 2026):** Shared `SiteConfig`, draft/publish, admin shell (`/admin`), runtime `--color-*` theming, logo URL/upload, `hero-rows` / `grid-first`, configurable homepage blocks, reset-to-defaults.
+
+**Deferred (follow-up):**
+
+| Item | Notes |
+|------|--------|
+| shadcn/ui theme bridge | Admin uses shadcn (Alert Dialog, Button). Site branding updates `--color-*` tokens; shadcn components use separate `--primary`, `--background`, `--popover`, etc. Bridge `applySiteTheme()` → shadcn tokens so admin UI follows published brand colors. |
+| More homepage category keys | Extend allowlist beyond trending/popular/top-rated as needed. |
+| shadcn admin forms polish | Migrate remaining admin inputs to shadcn components incrementally. |
+
 ---
 
 ## Phase 4 — Deploy-ready (customer runs their instance)
@@ -244,6 +254,7 @@ Implement only when needed:
 | Connector mode: first-good vs show-all | UX tuning |
 | Custom domain automation in wizard | Polish |
 | Source health / scoring | Many flaky sources |
+| shadcn theme bridge for admin UI | After Phase 3; see Phase 3 deferred |
 
 ---
 
@@ -273,9 +284,9 @@ Implement only when needed:
 
 ## Related docs
 
-- `docs/architecture.md` — stack ADR (Phase 0, complete)
+- `docs/architecture.md` — stack ADR (Phases 0–3)
 - `docs/connector-contract-v1.md` — normative connector API (Phase 2, implemented)
-- `openspec/specs/` — capability specs synced from Phase 0
+- `openspec/specs/` — capability specs synced from completed phases
 - `openspec/changes/archive/` — completed change proposals
 
 ---

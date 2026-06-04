@@ -1,6 +1,6 @@
 # Movie Streamer
 
-White-label, self-hosted streaming UI platform. Phase 1 adds TMDB browse/search/detail; Phase 2 adds multi-source resolve, connector admin API, and a source picker.
+White-label, self-hosted streaming UI platform. Phase 1 adds TMDB browse/search/detail; Phase 2 adds multi-source resolve and connector admin API; Phase 3 adds white-label site config (draft/publish), admin shell, and runtime theming.
 
 ## Prerequisites
 
@@ -98,8 +98,8 @@ docker compose -f docker-compose.dev.yml up
 | `pnpm dev:api` | API dev server |
 | `pnpm dev:web` | Vite dev server |
 | `pnpm build` | Build all packages |
-| `pnpm --filter @movie-streamer/api db:migrate` | Apply connector table migration |
-| `pnpm --filter @movie-streamer/api db:seed` | Seed demo + sample manual connectors |
+| `pnpm --filter @movie-streamer/api db:migrate` | Apply SQL migrations |
+| `pnpm --filter @movie-streamer/api db:seed` | Seed site config + demo/manual connectors |
 
 ## Phase 1 — Browse and play
 
@@ -128,6 +128,28 @@ API routes (via web proxy):
 - `POST /api/v1/admin/connectors/:id/test` — test connector with a `mediaRef`
 
 See [docs/connector-contract-v1.md](docs/connector-contract-v1.md) for request/response shapes.
+
+## Phase 3 — White-label and admin
+
+On startup the API seeds default **draft** and **published** site config (matching the original demo look). Use the web admin shell:
+
+1. Open http://localhost:5173/admin (or **Admin** in the subscriber header).
+2. **Branding** — site name, theme colors, logo (external URL or upload to server storage under `UPLOAD_DIR`).
+3. **Homepage** — layout template (`hero-rows` or `grid-first`) and TMDB category rows.
+4. **Preview** — see draft branding and homepage rows before publish.
+5. Click **Publish** in the admin header; the live site at `/` updates without redeploying the web bundle.
+
+Site API routes:
+
+- `GET /api/v1/site/config` — published config (subscriber)
+- `GET /api/v1/admin/site/config` — draft + published
+- `PATCH /api/v1/admin/site/config/draft` — update draft
+- `POST /api/v1/admin/site/config/publish` — promote draft to published
+- `POST /api/v1/admin/site/config/reset-default` — restore draft and published to factory defaults
+- `POST /api/v1/admin/site/logo` — multipart logo upload (updates draft)
+- `GET /api/v1/admin/site/preview-home` — catalog home using draft blocks
+
+**TMDB:** Set your own `TMDB_API_KEY` per deployment. You must follow [TMDB attribution and terms](https://www.themoviedb.org/api-terms-of-use); commercial use may require a TMDB commercial agreement.
 
 ### Admin API examples (curl)
 
@@ -182,6 +204,8 @@ Phase 1 adds: TMDB catalog API, browse/search/detail UI, Shaka demo playback.
 
 Phase 2 adds: connector persistence, resolve orchestration, admin connector API, source picker.
 
-Not included: theming, Deploy Pack, vendor `/prototype` routes.
+Phase 3 adds: site config draft/publish, admin shell, runtime theme, layout presets, configurable homepage rows.
+
+Not included: Deploy Pack, vendor `/prototype` routes (Phase 4–5).
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full roadmap.

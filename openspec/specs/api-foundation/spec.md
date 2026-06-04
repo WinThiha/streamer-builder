@@ -29,16 +29,16 @@ The API application SHALL validate required environment variables at startup usi
 
 ### Requirement: Database connection placeholder
 
-The API application SHALL initialize a Drizzle client connected to PostgreSQL using `DATABASE_URL`, SHALL verify connectivity via the health check, and SHALL use the database for application tables (starting with `connectors` in Phase 2).
+The API application SHALL initialize a Drizzle client connected to PostgreSQL using `DATABASE_URL`, SHALL verify connectivity via the health check, and SHALL use the database for application tables including `connectors` and `site_config`.
 
 #### Scenario: API starts with database available
 
 - **WHEN** the API starts with valid `DATABASE_URL` and PostgreSQL is running with migrations applied
-- **THEN** the API process remains running, `/health` responds successfully, and connector queries succeed
+- **THEN** the API process remains running, `/health` responds successfully, and connector and site config queries succeed
 
 ### Requirement: Catalog and play route groups mounted
 
-The API application SHALL mount versioned route groups under `/api/v1/catalog/*`, `/api/v1/play/*`, and `/api/v1/admin/connectors/*` in addition to the health endpoint.
+The API application SHALL mount versioned route groups under `/api/v1/catalog/*`, `/api/v1/play/*`, `/api/v1/admin/connectors/*`, `/api/v1/site/*`, and `/api/v1/admin/site/*` in addition to the health endpoint.
 
 #### Scenario: Catalog routes reachable
 
@@ -59,4 +59,14 @@ The API application SHALL mount versioned route groups under `/api/v1/catalog/*`
 
 - **WHEN** the API is running with valid configuration
 - **THEN** `GET /api/v1/admin/connectors` responds with the connector list
+
+#### Scenario: Public site config reachable
+
+- **WHEN** the API is running with valid configuration and site config seeded
+- **THEN** `GET /api/v1/site/config` responds with published site configuration
+
+#### Scenario: Admin site config reachable
+
+- **WHEN** the API is running with valid configuration
+- **THEN** `GET /api/v1/admin/site/config` responds with draft and published site configuration
 

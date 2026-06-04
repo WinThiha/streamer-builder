@@ -10,6 +10,8 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   TMDB_API_KEY: z.string().min(1),
   DEMO_HLS_URL: z.string().url().default(DEFAULT_DEMO_HLS_URL),
+  UPLOAD_DIR: z.string().min(1).default('./data/uploads'),
+  MAX_LOGO_BYTES: z.coerce.number().int().positive().default(2_097_152),
 });
 
 function loadEnv() {

@@ -1,3 +1,4 @@
+import type { SiteConfig, SiteConfigPatch } from '@movie-streamer/shared';
 import type {
   HomeCatalogResponse,
   MovieDetail,
@@ -7,6 +8,13 @@ import type {
   SeasonDetailResponse,
   TvDetail,
 } from './types';
+
+export type AdminSiteConfigResponse = {
+  draft: SiteConfig;
+  published: SiteConfig;
+  updatedAt: string;
+  publishedAt: string | null;
+};
 
 const apiBase = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? '';
 
@@ -104,6 +112,52 @@ export async function fetchPlayResolve(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ mediaRef }),
   });
+}
+
+export async function fetchSiteConfig(): Promise<SiteConfig> {
+  return fetchJson<SiteConfig>('/v1/site/config');
+}
+
+export async function fetchAdminSiteConfig(): Promise<AdminSiteConfigResponse> {
+  return fetchJson<AdminSiteConfigResponse>('/v1/admin/site/config');
+}
+
+export async function patchSiteConfigDraft(patch: SiteConfigPatch): Promise<AdminSiteConfigResponse> {
+  return fetchJson<AdminSiteConfigResponse>('/v1/admin/site/config/draft', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  });
+}
+
+export async function publishSiteConfig(): Promise<AdminSiteConfigResponse> {
+  return fetchJson<AdminSiteConfigResponse>('/v1/admin/site/config/publish', {
+    method: 'POST',
+  });
+}
+
+export async function resetSiteConfigToDefault(): Promise<AdminSiteConfigResponse> {
+  return fetchJson<AdminSiteConfigResponse>('/v1/admin/site/config/reset-default', {
+    method: 'POST',
+  });
+}
+
+export async function uploadSiteLogo(file: File): Promise<AdminSiteConfigResponse> {
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch(apiUrl('/v1/admin/site/logo'), {
+    method: 'POST',
+    body: form,
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(body?.error ?? `Upload failed: ${res.status}`);
+  }
+  return res.json() as Promise<AdminSiteConfigResponse>;
+}
+
+export async function fetchPreviewCatalogHome(): Promise<HomeCatalogResponse> {
+  return fetchJson<HomeCatalogResponse>('/v1/admin/site/preview-home');
 }
 
 export type { PlayLocationState } from './types';

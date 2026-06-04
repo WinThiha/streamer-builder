@@ -1,4 +1,6 @@
 import { backdropUrl, posterUrl } from '../tmdb/images.js';
+import type { HomepageBlock } from '@movie-streamer/shared';
+import { HOMEPAGE_CATEGORY_LABELS } from '@movie-streamer/shared';
 import type {
   TmdbMediaItem,
   TmdbMovieDetail,
@@ -35,33 +37,51 @@ function toCatalogItem(item: TmdbMediaItem, type?: 'movie' | 'tv'): CatalogItem 
   };
 }
 
+function itemsForCategory(
+  categoryKey: HomepageBlock['categoryKey'],
+  data: TmdbPagedResponse<TmdbMediaItem>,
+): CatalogItem[] {
+  if (categoryKey === 'popular_movies' || categoryKey === 'top_rated_movies') {
+    return data.results
+      .map((item) => toCatalogItem(item, 'movie'))
+      .filter((item): item is CatalogItem => item !== null);
+  }
+  if (categoryKey === 'popular_tv') {
+    return data.results
+      .map((item) => toCatalogItem(item, 'tv'))
+      .filter((item): item is CatalogItem => item !== null);
+  }
+  return data.results
+    .map((item) => toCatalogItem(item))
+    .filter((item): item is CatalogItem => item !== null);
+}
+
+export function mapHomeRowsFromBlocks(
+  blocks: HomepageBlock[],
+  categoryResults: TmdbPagedResponse<TmdbMediaItem>[],
+): CatalogRow[] {
+  return blocks.map((block, index) => ({
+    name: block.label ?? HOMEPAGE_CATEGORY_LABELS[block.categoryKey],
+    items: itemsForCategory(block.categoryKey, categoryResults[index]!),
+  }));
+}
+
+/** @deprecated Use mapHomeRowsFromBlocks with site config blocks */
 export function mapHomeRows(
   trending: TmdbPagedResponse<TmdbMediaItem>,
   popularMovies: TmdbPagedResponse<TmdbMediaItem>,
   popularTv: TmdbPagedResponse<TmdbMediaItem>,
 ): { rows: CatalogRow[] } {
-  const rows: CatalogRow[] = [
-    {
-      name: 'Trending Today',
-      items: trending.results
-        .map((item) => toCatalogItem(item))
-        .filter((item): item is CatalogItem => item !== null),
-    },
-    {
-      name: 'Popular Movies',
-      items: popularMovies.results
-        .map((item) => toCatalogItem(item, 'movie'))
-        .filter((item): item is CatalogItem => item !== null),
-    },
-    {
-      name: 'Popular TV',
-      items: popularTv.results
-        .map((item) => toCatalogItem(item, 'tv'))
-        .filter((item): item is CatalogItem => item !== null),
-    },
-  ];
-
-  return { rows };
+  return {
+    rows: mapHomeRowsFromBlocks(
+      [
+        { id: 'trending', categoryKey: 'trending_day' },
+        { id: 'popular-movies', categoryKey: 'popular_movies' },
+        { id: 'popular-tv', categoryKey: 'popular_tv' },
+      ],
+      [trending, popularMovies, popularTv],
+    ),
+  };
 }
 
 export function toFeaturedTitle(

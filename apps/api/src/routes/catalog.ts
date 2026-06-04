@@ -1,14 +1,15 @@
 import { Hono } from 'hono';
 import {
-  mapHomeRows,
   mapMovieDetail,
   mapSearchResults,
   mapSeasonDetail,
   mapTvDetail,
 } from '../catalog/mappers.js';
-import { resolveFeaturedTitle } from '../catalog/featured.js';
+import { buildCatalogHome } from '../catalog/home-builder.js';
+import { getPublishedSiteConfig } from '../site-config/repository.js';
 import { TmdbClient, TmdbError } from '../tmdb/client.js';
 import { env } from '../env.js';
+import { defaultSiteConfig } from '@movie-streamer/shared';
 
 const tmdb = new TmdbClient(env.TMDB_API_KEY);
 
@@ -16,14 +17,11 @@ export const catalogRoutes = new Hono();
 
 catalogRoutes.get('/home', async (c) => {
   try {
-    const [trending, popularMovies, popularTv] = await Promise.all([
-      tmdb.getTrendingAll(),
-      tmdb.getPopularMovies(),
-      tmdb.getPopularTv(),
-    ]);
-    const featured = await resolveFeaturedTitle(tmdb, trending);
-    const { rows } = mapHomeRows(trending, popularMovies, popularTv);
-    return c.json({ featured, rows });
+    const site = (await getPublishedSiteConfig()) ?? defaultSiteConfig;
+    const home = await buildCatalogHome(tmdb, site.homepage.blocks, {
+      showHero: site.homepage.showHero,
+    });
+    return c.json(home);
   } catch (err) {
     return handleTmdbError(c, err);
   }

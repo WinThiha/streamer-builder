@@ -1,5 +1,5 @@
 import { boolean, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
-import type { ConnectorConfig } from '@movie-streamer/shared';
+import type { ConnectorConfig, SiteConfig } from '@movie-streamer/shared';
 
 export const connectors = pgTable('connectors', {
   id: text('id').primaryKey(),
@@ -14,3 +14,13 @@ export const connectors = pgTable('connectors', {
 
 export type ConnectorRow = typeof connectors.$inferSelect;
 export type NewConnectorRow = typeof connectors.$inferInsert;
+
+export const siteConfig = pgTable('site_config', {
+  id: text('id').primaryKey(),
+  draft: jsonb('draft').notNull().$type<SiteConfig>(),
+  published: jsonb('published').notNull().$type<SiteConfig>(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  publishedAt: timestamp('published_at', { withTimezone: true }),
+});
+
+export type SiteConfigRow = typeof siteConfig.$inferSelect;
