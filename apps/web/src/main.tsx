@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { SiteConfigProvider } from './providers/SiteConfigProvider';
+import { AuthProvider } from './providers/AuthProvider';
 import './index.css';
 
 const queryClient = new QueryClient();
@@ -13,7 +14,9 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <SiteConfigProvider>
-          <App />
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </SiteConfigProvider>
       </BrowserRouter>
     </QueryClientProvider>

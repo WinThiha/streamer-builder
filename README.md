@@ -206,6 +206,14 @@ Phase 2 adds: connector persistence, resolve orchestration, admin connector API,
 
 Phase 3 adds: site config draft/publish, admin shell, runtime theme, layout presets, configurable homepage rows.
 
-Not included: Deploy Pack, vendor `/prototype` routes (Phase 4–5).
+## Phase 4 — Deploy Pack (production)
+
+Production templates live in `docker/production/` (Compose, Caddy, install/update/backup scripts). See [docker/production/QUICKSTART.md](docker/production/QUICKSTART.md).
+
+First-run setup at `/setup` (admin password, TMDB key, optional connector). Admin login at `/admin/login` in production deployments.
+
+Local dev: set `SESSION_SECRET` and `ADMIN_AUTH_DISABLED=true` in `.env`. Complete `/setup` once on a fresh database, or use existing DB with setup already completed.
+
+Not included: vendor `/prototype` routes (Phase 5).
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full roadmap.

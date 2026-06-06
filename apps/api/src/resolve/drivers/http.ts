@@ -1,5 +1,6 @@
 import {
-  resolveResponseSchema,
+  externalResolveResponseSchema,
+  sourceSchema,
   type HttpConnectorConfig,
   type MediaRef,
   type Source,
@@ -30,11 +31,14 @@ export async function resolveHttpConnector(
     }
 
     const body: unknown = await res.json();
-    const parsed = resolveResponseSchema.parse(body);
-    return parsed.sources.map((source) => ({
-      ...source,
-      connectorId: connector.id,
-    }));
+    const parsed = externalResolveResponseSchema.parse(body);
+    return parsed.sources.map((source, index) =>
+      sourceSchema.parse({
+        ...source,
+        id: source.id ?? `${connector.id}-${index}`,
+        connectorId: connector.id,
+      }),
+    );
   } finally {
     clearTimeout(timer);
   }

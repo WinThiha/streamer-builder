@@ -81,6 +81,9 @@ export type PlaybackSource = {
   kind: 'hls' | 'progressive' | 'embed';
   url: string;
   expiresAt?: string;
+  embedIframeSandboxEnabled?: boolean;
+  embedIframeSandboxPolicy?: string;
+  embedIframeAllow?: string;
 };
 
 export type ResolveResponse = {

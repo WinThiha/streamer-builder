@@ -123,7 +123,22 @@ Calls a customer-owned resolver.
 }
 ```
 
-**Response** (customer → platform): same shape as resolve response (`sources[]` only required).
+**Response** (customer → platform): `{ "sources": [...] }` — each source matches the `Source` shape **except** `connectorId` (the platform sets it).
+
+```json
+{
+  "sources": [
+    {
+      "id": "resolver-1",
+      "label": "My stream",
+      "kind": "hls",
+      "url": "https://example.com/stream.m3u8"
+    }
+  ]
+}
+```
+
+**Connector config:**
 
 ```json
 {
@@ -132,6 +147,43 @@ Calls a customer-owned resolver.
   "timeoutMs": 10000
 }
 ```
+
+### embed
+
+Builds a per-title iframe URL from separate movie and TV templates (no external resolver call).
+
+```json
+{
+  "kind": "embed",
+  "movieUrlTemplate": "https://vidsrc.to/embed/movie/{id}",
+  "tvUrlTemplate": "https://vidsrc.to/embed/tv/{id}/{season}/{episode}",
+  "sourceLabel": "My Player"
+}
+```
+
+Legacy configs with a single `urlTemplate` are treated as `movieUrlTemplate`.
+
+| Placeholder | Value |
+|-------------|-------|
+| `{id}` | TMDB id (URL-encoded) |
+| `{type}` | `movie`, `tv`, or `episode` |
+| `{season}` | Season number for TV; empty for movies |
+| `{episode}` | Episode number for TV; empty for movies |
+
+- `movieUrlTemplate` is **required** and must contain `{id}`.
+- `tvUrlTemplate` is **optional**; when set it must contain `{id}`, `{season}`, and `{episode}`. TV/episode play uses this template; if omitted, the connector returns no source for TV titles.
+
+After interpolation, the result MUST be a valid absolute URL. Resolve returns one `Source` with `kind: "embed"`.
+
+Optional iframe playback settings (stored on connector, applied on each resolved embed source):
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `iframeSandboxEnabled` | `false` | When true, sets the iframe `sandbox` attribute using `iframeSandboxPolicy` |
+| `iframeSandboxPolicy` | see below | Space-separated sandbox tokens when sandbox is enabled |
+| `iframeAllow` | `autoplay; fullscreen; encrypted-media; picture-in-picture` | Semicolon-separated Permissions Policy features for the iframe `allow` attribute |
+
+Default sandbox tokens when enabled: `allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox`
 
 ## Orchestration (platform behavior)
 

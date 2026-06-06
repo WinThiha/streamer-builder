@@ -1,7 +1,7 @@
 # site-admin-ui Specification
 
 ## Purpose
-TBD - created by archiving change phase-3-white-label. Update Purpose after archive.
+Provide an authenticated admin shell for branding, homepage configuration, draft preview, publish workflow, setup/login routes, and embed source management.
 ## Requirements
 ### Requirement: Admin shell route tree
 
@@ -57,4 +57,54 @@ The admin shell SHALL provide explicit actions to save draft (if not auto-saving
 
 - **WHEN** an admin publishes draft branding changes
 - **THEN** navigating to `/` shows the updated published branding without rebuilding the web bundle
+
+### Requirement: Admin shell requires authentication in production
+
+The admin shell at `/admin` SHALL require a valid admin session in production after setup is complete. Unauthenticated users SHALL be redirected to `/admin/login`.
+
+#### Scenario: Admin shell blocked without session
+
+- **WHEN** an unauthenticated user navigates to `/admin/branding` in production after setup is complete
+- **THEN** the browser is redirected to `/admin/login`
+
+### Requirement: Setup wizard connector step
+
+The `/setup` flow SHALL include an optional step to create a first connector of kind `http` or `manual`, using the same shared connector config validation as the admin API.
+
+#### Scenario: Setup creates HTTP connector
+
+- **WHEN** an operator completes setup with a valid HTTP connector configuration
+- **THEN** the connector is persisted and appears in subsequent resolve results when enabled
+
+#### Scenario: Setup skips optional connector
+
+- **WHEN** an operator completes setup without providing a connector
+- **THEN** setup still completes and seeded demo connectors remain available for playback
+
+### Requirement: Logout action in admin shell
+
+The admin shell SHALL provide a logout action that clears the admin session and returns the user to `/admin/login`.
+
+#### Scenario: Logout from admin
+
+- **WHEN** an authenticated admin activates logout
+- **THEN** subsequent navigation to `/admin/*` requires login again
+
+### Requirement: Admin Sources navigation
+
+The admin shell SHALL include navigation to `/admin/sources` for embed connector management, alongside existing branding, homepage, and preview routes.
+
+#### Scenario: Sources route registered
+
+- **WHEN** an authenticated admin navigates to `/admin/sources`
+- **THEN** the admin layout renders the Sources management page
+
+### Requirement: Setup optional embed connector
+
+The first-run setup flow SHALL allow operators to optionally configure an embed connector using a URL template, in addition to existing HTTP and manual connector options.
+
+#### Scenario: Embed option in setup
+
+- **WHEN** an operator enables the optional connector step during setup
+- **THEN** embed template is available as a connector kind with urlTemplate input
 

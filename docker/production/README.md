@@ -1,18 +1,18 @@
 # Production Docker layout (Phase 4)
 
-Phase 0 does not implement the customer Deploy Pack. This folder documents the target production topology.
+Customer Deploy Pack for self-hosted VPS installs: Caddy TLS, static web, API, PostgreSQL.
 
-## Target services
+## Topology
 
 ```
 Internet
     │
     ▼
 ┌─────────┐
-│  Caddy  │  :443 TLS, static web, /api → API
+│  Caddy  │  :443 TLS, SPA static via web, /api → API
 └────┬────┘
      │
-     ├──────────────▶ web (static build from apps/web)
+     ├──────────────▶ web (nginx + Vite build)
      │
      └──────────────▶ api :3001
                            │
@@ -22,11 +22,36 @@ Internet
                     └─────────────┘
 ```
 
-## Planned contents (Phase 4)
+## Contents
 
-- `docker-compose.yml` for customer VPS
-- `Caddyfile` with domain from `.env`
-- `install.sh`, `update.sh`, healthchecks
-- Generated `site.config.yaml` and secrets in Deploy Pack
+| File | Purpose |
+|------|---------|
+| `docker-compose.yml` | Production stack (prebuilt images by default) |
+| `docker-compose.build.yml` | Override to build API/web from repo Dockerfiles |
+| `Caddyfile` | TLS, `/api` reverse proxy, SPA fallback |
+| `.env.example` | Operator environment template |
+| `scripts/install.sh` | First install and health wait |
+| `scripts/update.sh` | Pull/recreate services |
+| `scripts/backup.sh` | Postgres dump + uploads archive |
+| `QUICKSTART.md` | Operator documentation |
 
-See [docs/ROADMAP.md](../../docs/ROADMAP.md) Phase 4.
+## Usage
+
+From this directory:
+
+```bash
+cp .env.example .env
+# edit .env
+chmod +x scripts/*.sh
+./scripts/install.sh
+```
+
+Local build from monorepo root context:
+
+```bash
+USE_LOCAL_BUILD=true ./scripts/install.sh
+```
+
+After install, complete first-run setup at `https://YOUR_DOMAIN/setup`.
+
+See [QUICKSTART.md](./QUICKSTART.md) and [docs/ROADMAP.md](../../docs/ROADMAP.md) Phase 4.

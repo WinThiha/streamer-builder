@@ -108,6 +108,10 @@ export class TmdbClient {
     return this.fetch<TmdbPagedResponse<TmdbMediaItem>>('/movie/top_rated');
   }
 
+  getConfiguration() {
+    return this.fetch<{ images?: { base_url?: string } }>('/configuration');
+  }
+
   searchMulti(query: string) {
     return this.fetch<TmdbPagedResponse<TmdbMediaItem>>('/search/multi', { query });
   }

@@ -14,8 +14,11 @@ import {
   updateConnector,
 } from '../../connectors/repository.js';
 import { bumpResolveCacheGeneration, testConnector } from '../../resolve/orchestrator.js';
+import { requireAdminAuth } from '../../auth/middleware.js';
 
 export const adminConnectorRoutes = new Hono();
+
+adminConnectorRoutes.use('*', requireAdminAuth);
 
 const createBodySchema = z.object({
   id: z.string().min(1).optional(),
@@ -37,52 +40,85 @@ function validateConfig(kind: z.infer<typeof connectorKindSchema>, config: unkno
   return connectorConfigSchema.parse({ ...(config as object), kind });
 }
 
+function validationErrorResponse(err: z.ZodError) {
+  const message = err.errors.map((issue) => issue.message).join('; ') || 'Invalid connector config';
+  return { error: message, details: err.flatten() };
+}
+
 adminConnectorRoutes.get('/', async (c) => {
   const connectors = await listConnectors();
   return c.json({ connectors });
 });
 
 adminConnectorRoutes.post('/', async (c) => {
-  const body = createBodySchema.parse(await c.req.json());
-  const config = validateConfig(body.kind, body.config);
-  const id = body.id ?? crypto.randomUUID();
-
-  const existing = await getConnectorById(id);
-  if (existing) {
-    return c.json({ error: 'Connector id already exists' }, 409);
+  let raw: unknown;
+  try {
+    raw = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
   }
 
-  const connector = await createConnector({
-    id,
-    label: body.label,
-    kind: body.kind,
-    enabled: body.enabled,
-    priority: body.priority,
-    config,
-  });
-  bumpResolveCacheGeneration();
-  return c.json({ connector }, 201);
+  try {
+    const body = createBodySchema.parse(raw);
+    const config = validateConfig(body.kind, body.config);
+    const id = body.id ?? crypto.randomUUID();
+
+    const existing = await getConnectorById(id);
+    if (existing) {
+      return c.json({ error: 'Connector id already exists' }, 409);
+    }
+
+    const connector = await createConnector({
+      id,
+      label: body.label,
+      kind: body.kind,
+      enabled: body.enabled,
+      priority: body.priority,
+      config,
+    });
+    bumpResolveCacheGeneration();
+    return c.json({ connector }, 201);
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return c.json(validationErrorResponse(err), 400);
+    }
+    throw err;
+  }
 });
 
 adminConnectorRoutes.patch('/:id', async (c) => {
   const id = c.req.param('id');
-  const body = updateBodySchema.parse(await c.req.json());
-  const existing = await getConnectorById(id);
-  if (!existing) {
-    return c.json({ error: 'Not found' }, 404);
+  let raw: unknown;
+  try {
+    raw = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
   }
 
-  const config =
-    body.config !== undefined ? validateConfig(existing.kind, body.config) : undefined;
+  try {
+    const body = updateBodySchema.parse(raw);
+    const existing = await getConnectorById(id);
+    if (!existing) {
+      return c.json({ error: 'Not found' }, 404);
+    }
 
-  const connector = await updateConnector(id, {
-    label: body.label,
-    enabled: body.enabled,
-    priority: body.priority,
-    config,
-  });
-  bumpResolveCacheGeneration();
-  return c.json({ connector });
+    const config =
+      body.config !== undefined ? validateConfig(existing.kind, body.config) : undefined;
+
+    const connector = await updateConnector(id, {
+      label: body.label,
+      enabled: body.enabled,
+      priority: body.priority,
+      config,
+    });
+    bumpResolveCacheGeneration();
+    return c.json({ connector });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return c.json(validationErrorResponse(err), 400);
+    }
+    throw err;
+  }
 });
 
 adminConnectorRoutes.delete('/:id', async (c) => {
@@ -97,17 +133,31 @@ adminConnectorRoutes.delete('/:id', async (c) => {
 
 adminConnectorRoutes.post('/:id/test', async (c) => {
   const id = c.req.param('id');
-  const body = z.object({ mediaRef: mediaRefSchema }).parse(await c.req.json());
-  const connector = await getConnectorById(id);
-  if (!connector) {
-    return c.json({ error: 'Not found' }, 404);
+  let raw: unknown;
+  try {
+    raw = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
   }
 
-  const result = await testConnector(connector, body.mediaRef);
-  return c.json({
-    connectorId: id,
-    ok: result.ok,
-    sources: result.sources,
-    error: result.error,
-  });
+  try {
+    const body = z.object({ mediaRef: mediaRefSchema }).parse(raw);
+    const connector = await getConnectorById(id);
+    if (!connector) {
+      return c.json({ error: 'Not found' }, 404);
+    }
+
+    const result = await testConnector(connector, body.mediaRef);
+    return c.json({
+      connectorId: id,
+      ok: result.ok,
+      sources: result.sources,
+      error: result.error,
+    });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return c.json(validationErrorResponse(err), 400);
+    }
+    throw err;
+  }
 });

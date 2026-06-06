@@ -1,0 +1,77 @@
+# Customer production stack. Run from this directory after copying .env.example to .env
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-movie}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-movie_streamer}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-movie} -d ${POSTGRES_DB:-movie_streamer}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    image: ${API_IMAGE:-ghcr.io/example/movie-streamer-api}:${IMAGE_TAG:-latest}
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-movie}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-movie_streamer}
+      APP_MODE: production
+      NODE_ENV: production
+      PORT: 3001
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET}
+      UPLOAD_DIR: /data/uploads
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      TMDB_API_KEY: ${TMDB_API_KEY:-}
+      SITE_CONFIG_BOOTSTRAP_PATH: ${SITE_CONFIG_BOOTSTRAP_PATH:-}
+    volumes:
+      - api_uploads:/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "fetch(''http://127.0.0.1:3001/health'').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    restart: unless-stopped
+
+  web:
+    image: ${WEB_IMAGE:-ghcr.io/example/movie-streamer-web}:${IMAGE_TAG:-latest}
+    expose:
+      - '80'
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  api_uploads:
+  caddy_data:
+  caddy_config:

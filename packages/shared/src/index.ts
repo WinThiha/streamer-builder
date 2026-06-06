@@ -14,21 +14,56 @@ export {
 export {
   resolveRequestSchema,
   resolveResponseSchema,
+  externalResolveResponseSchema,
   type ResolveRequest,
   type ResolveResponse,
+  type ExternalResolveResponse,
 } from './schemas/resolve.js';
+export {
+  interpolateEmbedTemplate,
+  SAMPLE_MOVIE_MEDIA_REF,
+  SAMPLE_TV_EPISODE_MEDIA_REF,
+  assertValidEmbedUrlAfterInterpolation,
+  isTvMediaRef,
+  resolveEmbedUrlForMediaRef,
+} from './embed-template.js';
+export {
+  DEFAULT_EMBED_IFRAME_ALLOW,
+  DEFAULT_EMBED_IFRAME_SANDBOX,
+  EMBED_IFRAME_ALLOW_OPTIONS,
+  EMBED_IFRAME_SANDBOX_OPTIONS,
+  formatSemicolonList,
+  formatSpaceList,
+  parseSemicolonList,
+  parseSpaceList,
+  resolveEmbedIframeSettings,
+  type EmbedIframeSettings,
+} from './embed-iframe-settings.js';
 export {
   connectorKindSchema,
   connectorConfigSchema,
   demoConnectorConfigSchema,
   manualConnectorConfigSchema,
   httpConnectorConfigSchema,
+  embedConnectorConfigSchema,
   type ConnectorKind,
   type ConnectorConfig,
   type DemoConnectorConfig,
   type ManualConnectorConfig,
   type HttpConnectorConfig,
+  type EmbedConnectorConfig,
 } from './schemas/connector.js';
+export {
+  setupStatusSchema,
+  setupStepsSchema,
+  setupCompleteBodySchema,
+  setupConnectorSchema,
+  validateSetupConnectorConfig,
+  type SetupStatus,
+  type SetupSteps,
+  type SetupCompleteBody,
+  type SetupConnectorInput,
+} from './schemas/deployment-settings.js';
 export {
   siteConfigSchema,
   siteConfigPatchSchema,

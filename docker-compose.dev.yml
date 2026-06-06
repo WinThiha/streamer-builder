@@ -45,8 +45,12 @@ services:
       DATABASE_URL: postgresql://movie:movie@postgres:5432/movie_streamer
       APP_MODE: production
       PORT: 3001
+      # Keep development in dev compose so pnpm installs devDependencies (tsc, tsx, vite).
+      # Auth enforcement: set ADMIN_AUTH_DISABLED=false in .env (works without NODE_ENV=production).
       NODE_ENV: development
       TMDB_API_KEY: ${TMDB_API_KEY:?Set TMDB_API_KEY in .env}
+      SESSION_SECRET: ${SESSION_SECRET}
+      ADMIN_AUTH_DISABLED: ${ADMIN_AUTH_DISABLED:-true}
     volumes: *node-dev-volumes
     depends_on:
       postgres:

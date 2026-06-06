@@ -1,0 +1,12 @@
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+    image: movie-streamer-api:local
+
+  web:
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+    image: movie-streamer-web:local

@@ -69,6 +69,13 @@ API and connectors import the same types. See [connector-contract-v1.md](./conne
 - **Without Docker:** `pnpm install`, set `.env`, run `pnpm dev:api` and `pnpm dev:web`. Web proxies `/api` → `http://localhost:3001`.
 - **With Docker:** `docker compose -f docker-compose.dev.yml up`.
 
-## Production (deferred)
+## Production (Phase 4)
 
-Customer Deploy Pack (Phase 4): Caddy → static web + API → PostgreSQL. See [docker/production/README.md](../docker/production/README.md).
+Customer Deploy Pack under `docker/production/`: Caddy TLS + static web (nginx) + API + PostgreSQL. Prebuilt images via `API_IMAGE` / `WEB_IMAGE` / `IMAGE_TAG`, with `docker-compose.build.yml` for local builds.
+
+- **Hybrid setup:** `.env` for domain, DB, session secret, images; `/setup` for admin password, TMDB key, optional first connector.
+- **Admin auth:** Session cookie protects `/v1/admin/*` in production after setup; `ADMIN_AUTH_DISABLED=true` in local dev.
+- **TMDB key:** Persisted in `deployment_settings` after setup; optional `TMDB_API_KEY` env fallback.
+- **Operator scripts:** `install.sh`, `update.sh`, `backup.sh`; see [docker/production/QUICKSTART.md](../docker/production/QUICKSTART.md).
+
+See [docker/production/README.md](../docker/production/README.md).

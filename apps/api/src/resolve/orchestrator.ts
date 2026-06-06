@@ -12,6 +12,7 @@ import {
   setCachedResolve,
 } from './cache.js';
 import { resolveDemoConnector } from './drivers/demo.js';
+import { resolveEmbedConnector } from './drivers/embed.js';
 import { resolveHttpConnector } from './drivers/http.js';
 import { resolveManualConnector } from './drivers/manual.js';
 
@@ -30,6 +31,8 @@ async function resolveConnector(
       return resolveManualConnector(connector);
     case 'http':
       return resolveHttpConnector(connector, mediaRef);
+    case 'embed':
+      return resolveEmbedConnector(connector, mediaRef);
     default:
       return [];
   }

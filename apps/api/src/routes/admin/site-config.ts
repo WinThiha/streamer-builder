@@ -17,12 +17,15 @@ import {
   validateLogoMime,
 } from '../../site-config/assets.js';
 import { env } from '../../env.js';
-import { TmdbClient, TmdbError } from '../../tmdb/client.js';
+import { createTmdbClient } from '../../tmdb/runtime.js';
+import { TmdbError } from '../../tmdb/client.js';
+import { TmdbNotConfiguredError } from '../../tmdb/not-configured.js';
 import { buildCatalogHome } from '../../catalog/home-builder.js';
+import { requireAdminAuth } from '../../auth/middleware.js';
 
 export const adminSiteRoutes = new Hono();
 
-const tmdb = new TmdbClient(env.TMDB_API_KEY);
+adminSiteRoutes.use('*', requireAdminAuth);
 
 adminSiteRoutes.get('/config', async (c) => {
   const data = await getAdminSiteConfig();
@@ -92,11 +95,15 @@ adminSiteRoutes.get('/preview-home', async (c) => {
   }
 
   try {
+    const tmdb = await createTmdbClient();
     const home = await buildCatalogHome(tmdb, draft.homepage.blocks, {
       showHero: draft.homepage.showHero,
     });
     return c.json(home);
   } catch (err) {
+    if (err instanceof TmdbNotConfiguredError) {
+      return c.json({ error: 'Catalog service unavailable' }, 503);
+    }
     if (err instanceof TmdbError) {
       const status = err.status >= 500 ? 503 : 502;
       return c.json({ error: 'Catalog service unavailable' }, status);

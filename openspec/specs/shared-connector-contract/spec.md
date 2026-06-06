@@ -43,7 +43,7 @@ The `packages/shared` package SHALL export Zod schemas for resolve v1 request (c
 
 ### Requirement: Connector config schemas exported
 
-The `packages/shared` package SHALL export Zod schemas for connector configuration discriminated by `kind`: `demo` (optional label override), `manual` (static `sources[]`), and `http` (`resolveUrl` and optional timeout). Inferred TypeScript types SHALL be exported for API and admin use.
+The `packages/shared` package SHALL export Zod schemas for connector configuration discriminated by `kind`: `demo` (optional label override), `manual` (static `sources[]`), `http` (`resolveUrl` and optional timeout), and `embed` (`urlTemplate` and optional `sourceLabel`). Inferred TypeScript types SHALL be exported for API and admin use.
 
 #### Scenario: Manual config parses
 
@@ -55,6 +55,11 @@ The `packages/shared` package SHALL export Zod schemas for connector configurati
 - **WHEN** a consumer parses an http config without `resolveUrl`
 - **THEN** parsing fails with a Zod validation error
 
+#### Scenario: Embed config parses
+
+- **WHEN** a consumer parses an embed config with a valid `urlTemplate` containing `{id}`
+- **THEN** parsing succeeds
+
 ### Requirement: Resolve request optional metadata
 
 The resolve request schema SHALL require `mediaRef` and MAY include an optional `metadata` object for forward-compatible enrichment (e.g. TMDB title fields) without requiring clients to send it in Phase 2.
@@ -63,4 +68,27 @@ The resolve request schema SHALL require `mediaRef` and MAY include an optional 
 
 - **WHEN** a consumer parses `{ "mediaRef": { "provider": "tmdb", "type": "movie", "id": "550" } }`
 - **THEN** parsing succeeds
+
+### Requirement: Embed connector config schema
+
+The `packages/shared` package SHALL export an `embed` connector config schema with fields: `kind: "embed"`, `urlTemplate` (non-empty string containing `{id}`), and optional `sourceLabel` (defaults to connector label at resolve time).
+
+#### Scenario: Valid embed config parses
+
+- **WHEN** a consumer parses `{ "kind": "embed", "urlTemplate": "https://player.example/embed/{type}/{id}?s={season}&e={episode}" }`
+- **THEN** parsing succeeds
+
+#### Scenario: Embed config without id placeholder rejected
+
+- **WHEN** a consumer parses an embed config whose `urlTemplate` does not contain `{id}`
+- **THEN** parsing fails with a validation error
+
+### Requirement: Embed connector kind in connector kind enum
+
+The shared `connectorKindSchema` SHALL include `embed` as a valid connector kind alongside `demo`, `manual`, and `http`.
+
+#### Scenario: Embed kind accepted
+
+- **WHEN** a consumer validates `kind: "embed"` against `connectorKindSchema`
+- **THEN** validation succeeds
 

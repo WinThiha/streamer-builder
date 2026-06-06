@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { fetchAdminSiteConfig, publishSiteConfig, resetSiteConfigToDefault } from '../lib/api';
+import { useAuth } from '../providers/AuthProvider';
 import { applySiteTheme } from '../lib/theme';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +20,7 @@ import {
 export function AdminShell() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   const { data, isLoading } = useQuery({
@@ -81,6 +83,14 @@ export function AdminShell() {
             >
               Preview
             </NavLink>
+            <NavLink
+              to="/admin/sources"
+              className={({ isActive }) =>
+                isActive ? 'text-[var(--color-primary)]' : 'text-[var(--color-muted)] hover:text-[var(--color-foreground)]'
+              }
+            >
+              Sources
+            </NavLink>
           </nav>
           <div className="ml-auto flex items-center gap-3 text-sm">
             {isLoading && <span className="text-[var(--color-muted)]">Loading…</span>}
@@ -127,6 +137,16 @@ export function AdminShell() {
             <Link to="/" className="text-[var(--color-muted)] hover:text-[var(--color-foreground)]">
               View site
             </Link>
+            <button
+              type="button"
+              className="text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
+              onClick={async () => {
+                await logout();
+                navigate('/admin/login');
+              }}
+            >
+              Log out
+            </button>
           </div>
         </div>
         {(publishMutation.isError || resetMutation.isError) && (

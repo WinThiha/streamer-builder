@@ -36,15 +36,6 @@ The web application SHALL pass the selected source `url` to Shaka Player for `hl
 - **WHEN** the user selects a different source in the picker
 - **THEN** Shaka Player loads the new URL
 
-### Requirement: Embed sources not played in Phase 2 UI
-
-When a resolved source has `kind: "embed"`, the web application SHALL NOT load it in Shaka and SHALL display a clear message that embed playback is not supported in this version.
-
-#### Scenario: Embed source shown but not played
-
-- **WHEN** resolve includes an embed source and the user selects it
-- **THEN** the user sees an unsupported message instead of a broken player
-
 ### Requirement: Resolve loading and error states
 
 The web application SHALL show loading while resolve is in progress and a user-visible error when resolve fails at the HTTP level or returns no playable sources.
@@ -67,4 +58,23 @@ The play page SHALL continue to display title context from router state and `Med
 
 - **WHEN** a user plays a TV episode with season and episode selected
 - **THEN** the play page shows that context alongside the source picker
+
+### Requirement: Embed sources played via iframe
+
+When a resolved source has `kind: "embed"`, the web application SHALL render a responsive sandboxed iframe loading the source `url` instead of Shaka Player.
+
+#### Scenario: Embed source plays in iframe
+
+- **WHEN** the user selects an embed source on the play page
+- **THEN** an iframe is displayed with `src` set to the source URL
+
+#### Scenario: Embed open in new tab fallback
+
+- **WHEN** an embed source is selected
+- **THEN** the play page provides a link to open the embed URL in a new browser tab
+
+#### Scenario: Single embed source shows context
+
+- **WHEN** resolve returns exactly one embed source
+- **THEN** the play page shows the source label or kind badge even when the source picker is hidden
 
