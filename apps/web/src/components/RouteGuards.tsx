@@ -2,13 +2,20 @@ import { useQuery } from '@tanstack/react-query';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { fetchSetupStatus } from '../lib/api';
 import { useAuth } from '../providers/AuthProvider';
+import { useIsPrototypeMode } from '../providers/AppModeProvider';
 
 export function SetupGate({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const prototypeMode = useIsPrototypeMode();
   const { data: setup, isLoading } = useQuery({
     queryKey: ['setup', 'status'],
     queryFn: fetchSetupStatus,
+    enabled: !prototypeMode,
   });
+
+  if (prototypeMode) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (

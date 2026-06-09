@@ -3,11 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { CatalogError, CatalogLoading } from '../components/CatalogStatus';
 import { MetaRating, TitleDetailHero } from '../components/TitleDetailHero';
 import { fetchMovieDetail } from '../lib/api';
+import { useAppPath } from '../providers/RouteBaseProvider';
 import { formatRating, formatRuntime, formatYear } from '../lib/format';
 
 export function MovieDetailPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
+  const playPath = useAppPath('/play');
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['catalog', 'movie', id],
@@ -17,7 +19,7 @@ export function MovieDetailPage() {
 
   function handlePlay() {
     if (!data) return;
-    navigate('/play', {
+    navigate(playPath, {
       state: {
         mediaRef: { provider: 'tmdb', type: 'movie', id: data.id },
         title: data.title,

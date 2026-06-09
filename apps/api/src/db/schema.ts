@@ -4,7 +4,7 @@ import type { ConnectorConfig, SiteConfig } from '@movie-streamer/shared';
 export const connectors = pgTable('connectors', {
   id: text('id').primaryKey(),
   label: text('label').notNull(),
-  kind: text('kind').notNull().$type<'demo' | 'manual' | 'http' | 'embed'>(),
+  kind: text('kind').notNull().$type<'demo' | 'manual' | 'http' | 'embed' | 'manifest'>(),
   enabled: boolean('enabled').notNull().default(true),
   priority: integer('priority').notNull().default(100),
   config: jsonb('config').notNull().$type<ConnectorConfig>(),

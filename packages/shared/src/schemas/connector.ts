@@ -6,7 +6,7 @@ import {
 } from '../embed-template.js';
 import { sourceSchema } from './source.js';
 
-export const connectorKindSchema = z.enum(['demo', 'manual', 'http', 'embed']);
+export const connectorKindSchema = z.enum(['demo', 'manual', 'http', 'embed', 'manifest']);
 
 export const demoConnectorConfigSchema = z.object({
   kind: z.literal('demo'),
@@ -101,11 +101,18 @@ export const embedConnectorConfigSchema = embedConnectorInputSchema
     ...(data.iframeAllow ? { iframeAllow: data.iframeAllow } : {}),
   }));
 
+export const manifestConnectorConfigSchema = z.object({
+  kind: z.literal('manifest'),
+  manifestUrl: z.string().url(),
+  timeoutMs: z.number().int().positive().max(60_000).optional(),
+});
+
 export const connectorConfigSchema = z.union([
   demoConnectorConfigSchema,
   manualConnectorConfigSchema,
   httpConnectorConfigSchema,
   embedConnectorConfigSchema,
+  manifestConnectorConfigSchema,
 ]);
 
 export type ConnectorKind = z.infer<typeof connectorKindSchema>;
@@ -113,4 +120,5 @@ export type DemoConnectorConfig = z.infer<typeof demoConnectorConfigSchema>;
 export type ManualConnectorConfig = z.infer<typeof manualConnectorConfigSchema>;
 export type HttpConnectorConfig = z.infer<typeof httpConnectorConfigSchema>;
 export type EmbedConnectorConfig = z.infer<typeof embedConnectorConfigSchema>;
+export type ManifestConnectorConfig = z.infer<typeof manifestConnectorConfigSchema>;
 export type ConnectorConfig = z.infer<typeof connectorConfigSchema>;

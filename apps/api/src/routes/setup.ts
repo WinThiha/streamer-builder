@@ -16,10 +16,17 @@ import { loadSiteConfigFromYaml } from '../site-config/bootstrap-yaml.js';
 import { defaultSiteConfig } from '@movie-streamer/shared';
 import { env } from '../env.js';
 import { validateTmdbApiKey } from '../tmdb/runtime.js';
+import { isPrototypeMode } from '../prototype/mode.js';
 
 export const setupRoutes = new Hono();
 
 async function buildSetupStatus() {
+  if (isPrototypeMode()) {
+    return setupStatusSchema.parse({
+      complete: true,
+      steps: { adminPassword: false, tmdbKey: false },
+    });
+  }
   const row = await getDeploymentSettings();
   const complete = row?.setupCompletedAt != null && row.adminPasswordHash != null;
   return setupStatusSchema.parse({

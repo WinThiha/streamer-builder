@@ -16,6 +16,11 @@ import { adminConnectorRoutes } from './routes/admin/connectors.js';
 import { adminAuthRoutes } from './routes/admin/auth.js';
 import { siteRoutes } from './routes/site.js';
 import { adminSiteRoutes } from './routes/admin/site-config.js';
+import { adminPlayRoutes } from './routes/admin/play.js';
+import { vendorRoutes } from './routes/vendor.js';
+import { seedPrototypeMode } from './prototype/seed.js';
+import { isPrototypeMode } from './prototype/mode.js';
+import { resolveRepoRoot } from './pack-generator/generate.js';
 
 const app = new Hono();
 
@@ -49,6 +54,8 @@ app.route('/v1/admin/auth', adminAuthRoutes);
 
 app.route('/v1/admin/connectors', adminConnectorRoutes);
 app.route('/v1/admin/site', adminSiteRoutes);
+app.route('/v1/admin/play', adminPlayRoutes);
+app.route('/v1/vendor', vendorRoutes);
 
 const port = env.PORT;
 
@@ -58,6 +65,18 @@ async function bootstrap() {
   await seedDeploymentSettings();
   await seedSiteConfig();
   await seedConnectors();
+  await seedPrototypeMode();
+  if (isPrototypeMode()) {
+    try {
+      const packRepoRoot = resolveRepoRoot();
+      console.log(
+        `Deploy pack source root: ${packRepoRoot} (DEPLOY_PACK_REPO_ROOT=${process.env.DEPLOY_PACK_REPO_ROOT ?? 'auto'})`,
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'unknown error';
+      console.warn(`Deploy pack full-source generation unavailable: ${message}`);
+    }
+  }
   console.log(`API listening on http://localhost:${port} (APP_MODE=${env.APP_MODE})`);
   serve({ fetch: app.fetch, port });
 }

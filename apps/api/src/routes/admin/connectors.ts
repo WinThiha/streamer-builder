@@ -14,7 +14,13 @@ import {
   updateConnector,
 } from '../../connectors/repository.js';
 import { bumpResolveCacheGeneration, testConnector } from '../../resolve/orchestrator.js';
+import { validateHttpConnectorUrl } from '../../resolve/drivers/http.js';
 import { requireAdminAuth } from '../../auth/middleware.js';
+import {
+  isConnectorKindAllowedInPrototype,
+  prototypeConnectorForbiddenMessage,
+} from '../../prototype/connector-policy.js';
+import { isPrototypeMode } from '../../prototype/mode.js';
 
 export const adminConnectorRoutes = new Hono();
 
@@ -37,7 +43,18 @@ const updateBodySchema = z.object({
 });
 
 function validateConfig(kind: z.infer<typeof connectorKindSchema>, config: unknown): ConnectorConfig {
-  return connectorConfigSchema.parse({ ...(config as object), kind });
+  const parsed = connectorConfigSchema.parse({ ...(config as object), kind });
+  if (parsed.kind === 'http') {
+    validateHttpConnectorUrl(parsed.resolveUrl);
+  }
+  if (parsed.kind === 'manifest') {
+    validateHttpConnectorUrl(parsed.manifestUrl);
+  }
+  return parsed;
+}
+
+function isPrototypeConnectorForbidden(kind: z.infer<typeof connectorKindSchema>): boolean {
+  return isPrototypeMode() && !isConnectorKindAllowedInPrototype(kind);
 }
 
 function validationErrorResponse(err: z.ZodError) {
@@ -60,6 +77,9 @@ adminConnectorRoutes.post('/', async (c) => {
 
   try {
     const body = createBodySchema.parse(raw);
+    if (isPrototypeConnectorForbidden(body.kind)) {
+      return c.json({ error: prototypeConnectorForbiddenMessage() }, 403);
+    }
     const config = validateConfig(body.kind, body.config);
     const id = body.id ?? crypto.randomUUID();
 
@@ -100,6 +120,10 @@ adminConnectorRoutes.patch('/:id', async (c) => {
     const existing = await getConnectorById(id);
     if (!existing) {
       return c.json({ error: 'Not found' }, 404);
+    }
+
+    if (body.enabled === true && isPrototypeMode() && !isConnectorKindAllowedInPrototype(existing.kind)) {
+      return c.json({ error: prototypeConnectorForbiddenMessage() }, 403);
     }
 
     const config =

@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchCatalogHome } from '../lib/api';
 import { CatalogError, CatalogLoading } from '../components/CatalogStatus';
-import { useSiteConfig } from '../providers/SiteConfigProvider';
+import { useEffectiveSiteConfig } from '../hooks/useEffectiveSiteConfig';
 import { HomeHeroRowsLayout } from './home/HomeHeroRowsLayout';
 import { HomeGridFirstLayout } from './home/HomeGridFirstLayout';
 
 export function Home() {
-  const { config } = useSiteConfig();
+  const { config } = useEffectiveSiteConfig();
   const templateId = config?.templateId ?? 'hero-rows';
 
   const { data, isLoading, isError, error } = useQuery({

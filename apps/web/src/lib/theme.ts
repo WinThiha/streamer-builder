@@ -26,3 +26,22 @@ export function applySiteTheme(theme: SiteTheme, element: HTMLElement = document
     element.style.setProperty('--font-sans', theme.fontSans);
   }
 }
+
+/** Map site brand colors to shadcn CSS variables for admin UI. */
+export function applyShadcnTheme(theme: SiteTheme, element: HTMLElement): void {
+  element.style.setProperty('--background', theme.background);
+  element.style.setProperty('--foreground', theme.foreground);
+  element.style.setProperty('--primary', theme.primary);
+  element.style.setProperty('--primary-foreground', theme.foreground);
+  element.style.setProperty('--muted', theme.surface);
+  element.style.setProperty('--muted-foreground', theme.muted);
+  element.style.setProperty('--card', theme.surface);
+  element.style.setProperty('--card-foreground', theme.foreground);
+  element.style.setProperty('--popover', theme.surface);
+  element.style.setProperty('--popover-foreground', theme.foreground);
+  element.style.setProperty('--accent', theme.surface);
+  element.style.setProperty('--accent-foreground', theme.foreground);
+  element.style.setProperty('--border', theme.muted);
+  element.style.setProperty('--input', theme.muted);
+  element.style.setProperty('--ring', theme.primary);
+}

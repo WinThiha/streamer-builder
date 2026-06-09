@@ -32,7 +32,7 @@ Install a self-hosted Movie Streamer instance on a VPS with Docker.
    ./scripts/install.sh
    ```
 
-   For local builds from source:
+   For local builds from a **full-source pack** (includes `docker-compose.build.yml` at the pack root):
 
    ```bash
    USE_LOCAL_BUILD=true ./scripts/install.sh
@@ -94,6 +94,8 @@ curl -X POST "https://YOUR_DOMAIN/api/v1/admin/connectors/CONNECTOR_ID/test" \
 ## Update
 
 ```bash
+# Recommended: backup before update
+./scripts/backup.sh
 # Set new IMAGE_TAG in .env if needed
 ./scripts/update.sh
 ```
@@ -108,10 +110,16 @@ The API runs database migrations on startup.
 
 Creates `backups/backup-TIMESTAMP/` with `database.sql` and `uploads.tar.gz`.
 
-## Restore (overview)
+## Restore
+
+```bash
+./scripts/restore.sh backups/backup-TIMESTAMP.tar.gz
+```
+
+Manual overview if needed:
 
 1. Stop the stack: `docker compose down`
-2. Restore Postgres: `docker compose up -d postgres`, then `psql` / `pg_restore` from `database.sql`
+2. Restore Postgres from `database.sql` in the backup archive
 3. Restore uploads volume from `uploads.tar.gz`
 4. Start full stack: `docker compose up -d`
 

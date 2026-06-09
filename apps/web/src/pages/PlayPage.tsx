@@ -8,6 +8,7 @@ import { SourcePicker } from '../components/SourcePicker';
 import { CatalogError, CatalogLoading } from '../components/CatalogStatus';
 import { fetchPlayResolve, type PlayLocationState } from '../lib/api';
 import type { PlaybackSource } from '../lib/types';
+import { useAppPath } from '../providers/RouteBaseProvider';
 
 function SingleSourceMeta({ source }: { source: PlaybackSource }) {
   return (
@@ -30,8 +31,16 @@ function SingleSourceMeta({ source }: { source: PlaybackSource }) {
 }
 
 export function PlayPage() {
+  const homePath = useAppPath('/');
   const location = useLocation();
   const state = location.state as PlayLocationState | null;
+  const detailPath = useAppPath(
+    state?.mediaRef?.type === 'movie'
+      ? `/movie/${state.mediaRef.id}`
+      : state?.mediaRef?.type === 'tv'
+        ? `/tv/${state.mediaRef.id}`
+        : '/',
+  );
   const [selectedSource, setSelectedSource] = useState<PlaybackSource | null>(null);
 
   const {
@@ -62,11 +71,10 @@ export function PlayPage() {
   }, [resolveData]);
 
   if (!state?.mediaRef) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={homePath} replace />;
   }
 
   const { mediaRef, title } = state;
-  const detailPath = mediaRef.type === 'movie' ? `/movie/${mediaRef.id}` : `/tv/${mediaRef.id}`;
   const contextLabel =
     mediaRef.type === 'movie'
       ? `Movie · TMDB ${mediaRef.id}`

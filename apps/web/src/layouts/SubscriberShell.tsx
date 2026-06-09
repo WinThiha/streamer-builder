@@ -1,5 +1,6 @@
 import { Link, Outlet } from 'react-router-dom';
-import { useSiteConfig } from '../providers/SiteConfigProvider';
+import { useEffectiveSiteConfig } from '../hooks/useEffectiveSiteConfig';
+import { useAppPath } from '../providers/RouteBaseProvider';
 import { apiUrl } from '../lib/api';
 import type { LogoConfig } from '@movie-streamer/shared';
 
@@ -12,7 +13,10 @@ function resolveLogoSrc(logo: LogoConfig): string {
 }
 
 export function SubscriberShell() {
-  const { config } = useSiteConfig();
+  const { config } = useEffectiveSiteConfig();
+  const homePath = useAppPath('/');
+  const searchPath = useAppPath('/search');
+  const aboutPath = useAppPath('/about');
   const siteName = config?.identity.siteName ?? 'Movie Streamer';
   const logo = config?.identity.logo;
 
@@ -20,7 +24,7 @@ export function SubscriberShell() {
     <div className="min-h-screen">
       <header className="border-b border-neutral-800">
         <nav className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-4 text-sm">
-          <Link to="/" className="flex items-center gap-2 font-semibold text-[var(--color-foreground)]">
+          <Link to={homePath} className="flex items-center gap-2 font-semibold text-[var(--color-foreground)]">
             {logo && (
               <img
                 src={resolveLogoSrc(logo)}
@@ -30,10 +34,10 @@ export function SubscriberShell() {
             )}
             <span>{siteName}</span>
           </Link>
-          <Link to="/search" className="text-[var(--color-muted)] hover:text-[var(--color-foreground)]">
+          <Link to={searchPath} className="text-[var(--color-muted)] hover:text-[var(--color-foreground)]">
             Search
           </Link>
-          <Link to="/about" className="text-[var(--color-muted)] hover:text-[var(--color-foreground)]">
+          <Link to={aboutPath} className="text-[var(--color-muted)] hover:text-[var(--color-foreground)]">
             About
           </Link>
           <Link to="/admin" className="ml-auto text-[var(--color-muted)] hover:text-[var(--color-foreground)]">

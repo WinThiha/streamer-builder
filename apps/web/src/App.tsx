@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { SubscriberShell } from './layouts/SubscriberShell';
 import { AdminShell } from './layouts/AdminShell';
+import { PrototypePresetLayout } from './layouts/PrototypePresetLayout';
 import { SetupGate, AdminAuthGate } from './components/RouteGuards';
 import { About } from './pages/About';
 import { Home } from './pages/Home';
@@ -14,8 +15,11 @@ import { HomepagePage } from './pages/admin/HomepagePage';
 import { PreviewPage } from './pages/admin/PreviewPage';
 import { SourcesPage } from './pages/admin/SourcesPage';
 import { LoginPage } from './pages/admin/LoginPage';
+import { PrototypeGalleryPage } from './pages/vendor/PrototypeGalleryPage';
+import { ConfigureWizardPage } from './pages/vendor/ConfigureWizardPage';
+import { useIsPrototypeMode } from './providers/AppModeProvider';
 
-export function App() {
+function ProductionApp() {
   return (
     <SetupGate>
       <Routes>
@@ -41,4 +45,28 @@ export function App() {
       </Routes>
     </SetupGate>
   );
+}
+
+function PrototypeApp() {
+  return (
+    <SetupGate>
+      <Routes>
+        <Route path="/configure" element={<ConfigureWizardPage />} />
+        <Route path="/prototype/:preset" element={<PrototypePresetLayout />}>
+          <Route index element={<Home />} />
+          <Route path="search" element={<SearchPage />} />
+          <Route path="movie/:id" element={<MovieDetailPage />} />
+          <Route path="tv/:id" element={<TvDetailPage />} />
+          <Route path="play" element={<PlayPage />} />
+          <Route path="about" element={<About />} />
+        </Route>
+        <Route path="/" element={<PrototypeGalleryPage />} />
+      </Routes>
+    </SetupGate>
+  );
+}
+
+export function App() {
+  const isPrototype = useIsPrototypeMode();
+  return isPrototype ? <PrototypeApp /> : <ProductionApp />;
 }

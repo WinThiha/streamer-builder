@@ -105,3 +105,12 @@ The production web build SHALL use an empty or same-origin `VITE_API_URL` so bro
 - **WHEN** the production web bundle loads on the customer domain
 - **THEN** client API helpers request paths under `/api/v1/...` on the same origin
 
+### Requirement: Web supports prototype routes
+
+The web application SHALL register routes for vendor gallery, `/prototype/:preset`, and `/configure` when running in prototype mode.
+
+#### Scenario: Prototype gallery route
+
+- **WHEN** `VITE_APP_MODE=prototype`
+- **THEN** `/` shows the prototype preset gallery
+

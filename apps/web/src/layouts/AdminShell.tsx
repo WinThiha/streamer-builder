@@ -1,9 +1,9 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { fetchAdminSiteConfig, publishSiteConfig, resetSiteConfigToDefault } from '../lib/api';
 import { useAuth } from '../providers/AuthProvider';
-import { applySiteTheme } from '../lib/theme';
+import { applyShadcnTheme, applySiteTheme } from '../lib/theme';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -22,6 +22,7 @@ export function AdminShell() {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const adminRootRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['site', 'config', 'admin'],
@@ -53,8 +54,20 @@ export function AdminShell() {
 
   const actionsDisabled = resetMutation.isPending || publishMutation.isPending;
 
+  useEffect(() => {
+    const theme = data?.published.theme;
+    const root = adminRootRef.current;
+    if (theme && root) {
+      applySiteTheme(theme, root);
+      applyShadcnTheme(theme, root);
+    }
+  }, [data?.published.theme]);
+
   return (
-    <div className="dark min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)]">
+    <div
+      ref={adminRootRef}
+      className="dark min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)]"
+    >
       <header className="border-b border-neutral-800">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-4 px-6 py-4">
           <span className="font-semibold">Site admin</span>

@@ -46,13 +46,41 @@ export {
   manualConnectorConfigSchema,
   httpConnectorConfigSchema,
   embedConnectorConfigSchema,
+  manifestConnectorConfigSchema,
   type ConnectorKind,
   type ConnectorConfig,
   type DemoConnectorConfig,
   type ManualConnectorConfig,
   type HttpConnectorConfig,
   type EmbedConnectorConfig,
+  type ManifestConnectorConfig,
 } from './schemas/connector.js';
+export {
+  validateOutboundUrl,
+  assertSafeOutboundUrl,
+  hostnameAllowed,
+  type UrlSafetyOptions,
+  type UrlSafetyResult,
+} from './url-safety.js';
+export {
+  PROTOTYPE_PRESETS,
+  getPrototypePreset,
+  applyPresetOverlay,
+  type PrototypePreset,
+} from './prototype-presets.js';
+export {
+  wizardPayloadSchema,
+  deployPackKindSchema,
+  type WizardPayload,
+  type DeployPackKind,
+} from './schemas/wizard-payload.js';
+export {
+  adminResolveResponseSchema,
+  adminResolveRequestSchema,
+  connectorResolveResultSchema,
+  type AdminResolveResponse,
+  type ConnectorResolveResult,
+} from './schemas/resolve-diagnostics.js';
 export {
   setupStatusSchema,
   setupStepsSchema,
@@ -70,6 +98,8 @@ export {
   siteThemeSchema,
   logoSchema,
   templateIdSchema,
+  playbackConfigSchema,
+  connectorResolveModeSchema,
   homepageBlockSchema,
   homepageCategoryKeySchema,
   HOMEPAGE_CATEGORY_LABELS,
@@ -80,6 +110,8 @@ export {
   type SiteTheme,
   type LogoConfig,
   type TemplateId,
+  type PlaybackConfig,
+  type ConnectorResolveMode,
   type HomepageBlock,
   type HomepageCategoryKey,
 } from './schemas/site-config.js';

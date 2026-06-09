@@ -1,9 +1,11 @@
 import type { Context, Next } from 'hono';
 import { env } from '../env.js';
 import { isSetupComplete } from '../deployment-settings/repository.js';
+import { isPrototypeMode } from '../prototype/mode.js';
 import { readSessionCookie, verifySessionToken } from './session.js';
 
 export function isAdminAuthDisabled(): boolean {
+  if (isPrototypeMode()) return true;
   return env.NODE_ENV === 'development' && env.ADMIN_AUTH_DISABLED;
 }
 

@@ -43,7 +43,8 @@ services:
     environment:
       <<: *node-dev-env
       DATABASE_URL: postgresql://movie:movie@postgres:5432/movie_streamer
-      APP_MODE: production
+      APP_MODE: ${APP_MODE:-production}
+      DEPLOY_PACK_REPO_ROOT: /app
       PORT: 3001
       # Keep development in dev compose so pnpm installs devDependencies (tsc, tsx, vite).
       # Auth enforcement: set ADMIN_AUTH_DISABLED=false in .env (works without NODE_ENV=production).
@@ -78,6 +79,7 @@ services:
     environment:
       <<: *node-dev-env
       VITE_PROXY_API_TARGET: http://api:3001
+      VITE_APP_MODE: ${VITE_APP_MODE:-${APP_MODE:-production}}
       VITE_DOCKER: "true"
       VITE_HMR_HOST: localhost
       CHOKIDAR_USEPOLLING: "true"

@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import type { FeaturedTitle } from '../lib/types';
+import { useAppPath } from '../providers/RouteBaseProvider';
 
 type HeroBannerProps = {
   featured: FeaturedTitle;
@@ -7,11 +8,14 @@ type HeroBannerProps = {
 
 export function HeroBanner({ featured }: HeroBannerProps) {
   const navigate = useNavigate();
-  const detailPath = featured.type === 'movie' ? `/movie/${featured.id}` : `/tv/${featured.id}`;
+  const playPath = useAppPath('/play');
+  const detailPath = useAppPath(
+    featured.type === 'movie' ? `/movie/${featured.id}` : `/tv/${featured.id}`,
+  );
 
   function handlePlay() {
     if (featured.type === 'movie') {
-      navigate('/play', {
+      navigate(playPath, {
         state: {
           mediaRef: { provider: 'tmdb', type: 'movie', id: featured.id },
           title: featured.title,
@@ -20,7 +24,7 @@ export function HeroBanner({ featured }: HeroBannerProps) {
       return;
     }
 
-    navigate('/play', {
+    navigate(playPath, {
       state: {
         mediaRef: { provider: 'tmdb', type: 'tv', id: featured.id, season: 1, episode: 1 },
         title: featured.title,

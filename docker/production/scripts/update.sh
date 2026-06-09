@@ -4,12 +4,18 @@ set -eu
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 cd "$ROOT"
 
+echo "Tip: run ./scripts/backup.sh before updating production."
+
 COMPOSE_FILES="-f docker-compose.yml"
 if [ "${USE_LOCAL_BUILD:-false}" = "true" ]; then
   COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.build.yml"
 fi
 
-docker compose $COMPOSE_FILES pull api web || true
+if [ "${USE_LOCAL_BUILD:-false}" = "true" ]; then
+  docker compose $COMPOSE_FILES build api web
+else
+  docker compose $COMPOSE_FILES pull api web || true
+fi
 docker compose $COMPOSE_FILES up -d --force-recreate api web caddy
 
 echo "Waiting for API health..."

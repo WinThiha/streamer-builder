@@ -1,0 +1,15 @@
+# Build override — context is the monorepo / full-source pack root (this directory).
+# Included from docker/production/docker-compose.build.yml when USE_LOCAL_BUILD=true.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: movie-streamer-api:local
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: movie-streamer-web:local

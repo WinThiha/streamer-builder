@@ -27,7 +27,7 @@ Internet
 | File | Purpose |
 |------|---------|
 | `docker-compose.yml` | Production stack (prebuilt images by default) |
-| `docker-compose.build.yml` | Override to build API/web from repo Dockerfiles |
+| `docker-compose.build.yml` | Includes pack-root build override (`../../docker-compose.build.yml`) |
 | `Caddyfile` | TLS, `/api` reverse proxy, SPA fallback |
 | `.env.example` | Operator environment template |
 | `scripts/install.sh` | First install and health wait |
@@ -46,7 +46,7 @@ chmod +x scripts/*.sh
 ./scripts/install.sh
 ```
 
-Local build from monorepo root context:
+Local build (full-source pack or dev monorepo; builds from pack/repo root):
 
 ```bash
 USE_LOCAL_BUILD=true ./scripts/install.sh

@@ -1,12 +1,3 @@
-services:
-  api:
-    build:
-      context: ../..
-      dockerfile: apps/api/Dockerfile
-    image: movie-streamer-api:local
-
-  web:
-    build:
-      context: ../..
-      dockerfile: apps/web/Dockerfile
-    image: movie-streamer-web:local
+# Local image build override. Requires monorepo / full-source pack root at ../..
+include:
+  - path: ../../docker-compose.build.yml

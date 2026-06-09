@@ -57,6 +57,17 @@ export const templateIdSchema = z.enum(['hero-rows', 'grid-first']);
 
 export type TemplateId = z.infer<typeof templateIdSchema>;
 
+export const connectorResolveModeSchema = z.enum(['show-all', 'first-good']);
+
+export type ConnectorResolveMode = z.infer<typeof connectorResolveModeSchema>;
+
+export const playbackConfigSchema = z.object({
+  connectorResolveMode: connectorResolveModeSchema.default('show-all'),
+  embedAllowlist: z.array(z.string().min(1)).default([]),
+});
+
+export type PlaybackConfig = z.infer<typeof playbackConfigSchema>;
+
 export const siteConfigSchema = z.object({
   identity: z.object({
     siteName: z.string().min(1),
@@ -67,6 +78,10 @@ export const siteConfigSchema = z.object({
   homepage: z.object({
     showHero: z.boolean().default(true),
     blocks: z.array(homepageBlockSchema).min(1),
+  }),
+  playback: playbackConfigSchema.default({
+    connectorResolveMode: 'show-all',
+    embedAllowlist: [],
   }),
 });
 
@@ -96,5 +111,9 @@ export const defaultSiteConfig: SiteConfig = {
       { id: 'popular-movies', categoryKey: 'popular_movies' },
       { id: 'popular-tv', categoryKey: 'popular_tv' },
     ],
+  },
+  playback: {
+    connectorResolveMode: 'show-all',
+    embedAllowlist: [],
   },
 };

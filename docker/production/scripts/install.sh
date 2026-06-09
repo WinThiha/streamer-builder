@@ -39,6 +39,10 @@ if [ "${USE_LOCAL_BUILD:-false}" = "true" ]; then
   COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.build.yml"
 fi
 
+if [ "${USE_LOCAL_BUILD:-false}" = "true" ]; then
+  docker compose $COMPOSE_FILES build api web
+fi
+
 docker compose $COMPOSE_FILES up -d
 
 echo "Waiting for API health..."

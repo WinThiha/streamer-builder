@@ -1,4 +1,4 @@
-import type { SiteConfig, SiteConfigPatch } from '@movie-streamer/shared';
+import type { SiteConfig, SiteConfigPatch, WizardPayload } from '@movie-streamer/shared';
 import type {
   HomeCatalogResponse,
   MovieDetail,
@@ -321,6 +321,46 @@ export async function testConnector(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ mediaRef }),
   });
+}
+
+export type VendorPresetSummary = {
+  slug: string;
+  name: string;
+  description: string;
+};
+
+export async function fetchVendorPresets(): Promise<{ presets: VendorPresetSummary[] }> {
+  return fetchJson<{ presets: VendorPresetSummary[] }>('/v1/vendor/presets');
+}
+
+const FULL_SOURCE_PACK_MIN_BYTES = 50_000;
+
+export async function generateDeployPack(payload: WizardPayload): Promise<Blob> {
+  const res = await fetch(apiUrl('/v1/vendor/pack'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as ApiErrorBody | null;
+    throw new Error(formatApiError(body, res.status));
+  }
+  const packKindHeader = res.headers.get('X-Pack-Kind');
+  const blob = await res.blob();
+  if ((payload.packKind ?? 'deploy-only') === 'full-source') {
+    if (packKindHeader === 'deploy-only') {
+      throw new Error(
+        'Server returned a deploy-only pack instead of full source. Restart the API and try again.',
+      );
+    }
+    if (blob.size < FULL_SOURCE_PACK_MIN_BYTES) {
+      throw new Error(
+        `Full source pack looks incomplete (${blob.size} bytes). Restart the API and try again.`,
+      );
+    }
+  }
+  return blob;
 }
 
 export type { PlayLocationState } from './types';

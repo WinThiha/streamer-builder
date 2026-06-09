@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 import type { CatalogItem } from '../lib/types';
+import { useAppPath } from '../providers/RouteBaseProvider';
 
 type MediaCardProps = {
   item: CatalogItem;
 };
 
 export function MediaCard({ item }: MediaCardProps) {
-  const to = item.type === 'movie' ? `/movie/${item.id}` : `/tv/${item.id}`;
+  const to = useAppPath(item.type === 'movie' ? `/movie/${item.id}` : `/tv/${item.id}`);
 
   return (
     <Link

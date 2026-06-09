@@ -4,11 +4,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { CatalogError, CatalogLoading } from '../components/CatalogStatus';
 import { MetaRating, TitleDetailHero } from '../components/TitleDetailHero';
 import { fetchTvDetail, fetchTvSeason } from '../lib/api';
+import { useAppPath } from '../providers/RouteBaseProvider';
 import { formatRating, formatRuntime, formatYear } from '../lib/format';
 
 export function TvDetailPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
+  const playPath = useAppPath('/play');
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
   const [selectedEpisode, setSelectedEpisode] = useState<number | null>(null);
 
@@ -42,7 +44,7 @@ export function TvDetailPage() {
 
   function handlePlay() {
     if (!show || selectedSeason === null || selectedEpisode === null) return;
-    navigate('/play', {
+    navigate(playPath, {
       state: {
         mediaRef: {
           provider: 'tmdb',

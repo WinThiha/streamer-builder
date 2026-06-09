@@ -1,4 +1,5 @@
 import {
+  assertSafeOutboundUrl,
   externalResolveResponseSchema,
   sourceSchema,
   type HttpConnectorConfig,
@@ -6,14 +7,20 @@ import {
   type Source,
 } from '@movie-streamer/shared';
 import type { ConnectorRecord } from '../../connectors/repository.js';
+import { isProductionRuntime } from '../../env.js';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
+
+export function validateHttpConnectorUrl(resolveUrl: string): void {
+  assertSafeOutboundUrl(resolveUrl, { allowLocalhost: !isProductionRuntime() });
+}
 
 export async function resolveHttpConnector(
   connector: ConnectorRecord,
   mediaRef: MediaRef,
 ): Promise<Source[]> {
   const config = connector.config as HttpConnectorConfig;
+  validateHttpConnectorUrl(config.resolveUrl);
   const timeoutMs = config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
